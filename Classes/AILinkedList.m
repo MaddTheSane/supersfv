@@ -7,14 +7,15 @@
 //
 
 #import "AILinkedList.h"
-#import "AILinkedListObject.h"
+#import "SuperSFV-Swift.h"
+#import <Foundation/Foundation.h>
 
 @interface AILinkedList (PRIVATE)
 - (id)linkedListObjectAtIndex:(NSUInteger)index;
 @end
 
 @implementation AILinkedList {
-    AILinkedListObject *front, *back;
+    LinkedListObject *front, *back;
 }
 @synthesize count;
 
@@ -29,7 +30,7 @@
 
 - (void)dealloc {
 	@synchronized(self) {
-		AILinkedListObject *tmp;
+		LinkedListObject *tmp;
 		while (front != nil) {
 			tmp = front;
 			front = [front nextObject];
@@ -48,7 +49,7 @@
 }
 
 - (id)linkedListObjectAtIndex:(NSUInteger)index {
-	AILinkedListObject *current;
+	LinkedListObject *current;
 	
 	@synchronized(self) {
 		if (index >= count)
@@ -110,8 +111,8 @@
 		if (index > count)
 			[NSException raise:NSRangeException format:@"The index %lu is out of range.", (unsigned long)index];
 		
-		AILinkedListObject *newObject = [[AILinkedListObject alloc] initWithObject:object];
-		AILinkedListObject *last, *next, *tmp;
+		LinkedListObject *newObject = [[LinkedListObject alloc] initWithObject:object];
+		LinkedListObject *last, *next, *tmp;
 		unsigned i;
 		
 		if (index == count) {
@@ -154,12 +155,12 @@
 - (id)removeObjectAtIndex:(NSUInteger)index {
 	id goneID;
 	@synchronized(self) {
-		AILinkedListObject *goneObject = [self linkedListObjectAtIndex:index];
+		LinkedListObject *goneObject = [self linkedListObjectAtIndex:index];
 		if (goneObject == nil) {
 			goneID = nil;
 		}
 		else {
-			AILinkedListObject *last = [goneObject lastObject], *next = [goneObject nextObject];
+			LinkedListObject *last = [goneObject lastObject], *next = [goneObject nextObject];
 			
 			if (last == nil)
 				front = next;

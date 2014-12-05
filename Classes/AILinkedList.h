@@ -8,7 +8,7 @@
 
 #import <Foundation/NSObject.h>
 
-@class AILinkedListObject;
+@class LinkedListObject;
 
 @interface AILinkedList : NSObject 
 /* Returns the object */

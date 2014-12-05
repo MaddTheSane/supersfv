@@ -10,7 +10,6 @@
 		4E283F5F0AB657F9007B4BFC /* SuperSFVHelp in Resources */ = {isa = PBXBuildFile; fileRef = 4E283F5C0AB657F9007B4BFC /* SuperSFVHelp */; };
 		4E4AC9580AB7E6130046762E /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E4AC9560AB7E6130046762E /* License.txt */; };
 		4E515BE00AB4E1DF00B2BE93 /* AILinkedList.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E515BDC0AB4E1DF00B2BE93 /* AILinkedList.m */; };
-		4E515BE10AB4E1DF00B2BE93 /* AILinkedListObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E515BDE0AB4E1DF00B2BE93 /* AILinkedListObject.m */; };
 		4E593D6E0AB3465E0092AE43 /* SPTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E593D6D0AB3465E0092AE43 /* SPTableView.m */; };
 		4E593E6B0AB371450092AE43 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E593E6A0AB371450092AE43 /* crc32.c */; };
 		4E971A930AB0FCF0005F28B2 /* SPSuperSFV.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */; };
@@ -20,6 +19,7 @@
 		5542CD191A3174A70081E21E /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD1B1A3174A70081E21E /* Credits.rtf */; };
 		558C332813A91A3E00EC0CAE /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 558C332713A91A3E00EC0CAE /* libcrypto.dylib */; };
 		55A1EB9E1A32075400CB1E49 /* Queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A1EB9D1A32075400CB1E49 /* Queue.swift */; };
+		55A1EBA01A320A9000CB1E49 /* LinkedListObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A1EB9F1A320A9000CB1E49 /* LinkedListObject.swift */; };
 		55EAFC9B1A318722002E6E2E /* FileEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EAFC9A1A318722002E6E2E /* FileEntry.swift */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -36,8 +36,6 @@
 		4E4AC9560AB7E6130046762E /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = SOURCE_ROOT; };
 		4E515BDB0AB4E1DF00B2BE93 /* AILinkedList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AILinkedList.h; sourceTree = "<group>"; };
 		4E515BDC0AB4E1DF00B2BE93 /* AILinkedList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AILinkedList.m; sourceTree = "<group>"; };
-		4E515BDD0AB4E1DF00B2BE93 /* AILinkedListObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AILinkedListObject.h; sourceTree = "<group>"; };
-		4E515BDE0AB4E1DF00B2BE93 /* AILinkedListObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AILinkedListObject.m; sourceTree = "<group>"; };
 		4E593D6C0AB3465E0092AE43 /* SPTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTableView.h; sourceTree = "<group>"; };
 		4E593D6D0AB3465E0092AE43 /* SPTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTableView.m; sourceTree = "<group>"; };
 		4E593E690AB371450092AE43 /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
@@ -50,6 +48,7 @@
 		5542CD1A1A3174A70081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		558C332713A91A3E00EC0CAE /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = usr/lib/libcrypto.dylib; sourceTree = SDKROOT; };
 		55A1EB9D1A32075400CB1E49 /* Queue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Queue.swift; sourceTree = "<group>"; };
+		55A1EB9F1A320A9000CB1E49 /* LinkedListObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkedListObject.swift; sourceTree = "<group>"; };
 		55EAFC991A318721002E6E2E /* SuperSFV-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SuperSFV-Bridging-Header.h"; sourceTree = "<group>"; };
 		55EAFC9A1A318722002E6E2E /* FileEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEntry.swift; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
@@ -75,8 +74,6 @@
 				55EAFC991A318721002E6E2E /* SuperSFV-Bridging-Header.h */,
 				4E515BDB0AB4E1DF00B2BE93 /* AILinkedList.h */,
 				4E515BDC0AB4E1DF00B2BE93 /* AILinkedList.m */,
-				4E515BDD0AB4E1DF00B2BE93 /* AILinkedListObject.h */,
-				4E515BDE0AB4E1DF00B2BE93 /* AILinkedListObject.m */,
 				4E971A910AB0FCF0005F28B2 /* SPSuperSFV.h */,
 				4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */,
 				4E593D6C0AB3465E0092AE43 /* SPTableView.h */,
@@ -173,6 +170,7 @@
 			children = (
 				55A1EB9D1A32075400CB1E49 /* Queue.swift */,
 				55EAFC9A1A318722002E6E2E /* FileEntry.swift */,
+				55A1EB9F1A320A9000CB1E49 /* LinkedListObject.swift */,
 			);
 			name = Swift;
 			sourceTree = "<group>";
@@ -255,8 +253,8 @@
 				4E593D6E0AB3465E0092AE43 /* SPTableView.m in Sources */,
 				4E593E6B0AB371450092AE43 /* crc32.c in Sources */,
 				4E515BE00AB4E1DF00B2BE93 /* AILinkedList.m in Sources */,
+				55A1EBA01A320A9000CB1E49 /* LinkedListObject.swift in Sources */,
 				55A1EB9E1A32075400CB1E49 /* Queue.swift in Sources */,
-				4E515BE10AB4E1DF00B2BE93 /* AILinkedListObject.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
