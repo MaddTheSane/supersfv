@@ -10,9 +10,7 @@
 
 @class AILinkedListObject;
 
-@interface AILinkedList : NSObject {
-	AILinkedListObject *front, *back;
-}
+@interface AILinkedList : NSObject 
 /* Returns the object */
 - (id)objectAtIndex:(unsigned)index; /* O(N) */
 - (id)objectAtFront; /* O(1) */

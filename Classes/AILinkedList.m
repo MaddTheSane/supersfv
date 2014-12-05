@@ -13,7 +13,9 @@
 - (id)linkedListObjectAtIndex:(NSUInteger)index;
 @end
 
-@implementation AILinkedList
+@implementation AILinkedList {
+    AILinkedListObject *front, *back;
+}
 @synthesize count;
 
 - (id)init {

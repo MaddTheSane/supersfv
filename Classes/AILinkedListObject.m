@@ -32,11 +32,4 @@
 	[theObject setLastObject:self];
 }
 
-- (AILinkedListObject *)lastObject {
-	return last;
-}
-
-- (AILinkedListObject *)nextObject {
-	return next;
-}
 @end

@@ -45,7 +45,7 @@
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
 {
     records = [[NSMutableArray alloc] init];
-    pendingFiles = [[AIQueue alloc] init];
+    pendingFiles = [[Queue alloc] init];
     [NSThread detachNewThreadSelector:@selector(fileAddingThread) toTarget:self withObject:nil];
     
     continueProcessing = YES;
