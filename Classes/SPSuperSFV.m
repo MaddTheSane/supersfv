@@ -33,6 +33,7 @@
 #define SaveToolbarIdentifier        @"Save Toolbar Identifier"
 
 @implementation SPSuperSFV
+@synthesize tableView_fileList;
 
 #pragma mark Initialization (App launching)
 + (void)initialize {
@@ -57,7 +58,6 @@
     tableColumn = [tableView_fileList tableColumnWithIdentifier:@"status"];
     [cell setEditable: YES];
     [tableColumn setDataCell:cell];
-    [cell release];
     cell = [[NSImageCell alloc] initImageCell:nil];
     
     // selecting items our table view and pressing the delete key
@@ -106,7 +106,7 @@
 - (void) applicationWillTerminate: (NSNotification *) notification
 {
     // dealloc, etc
-    [pendingFiles release]; pendingFiles = nil;
+	pendingFiles = nil;
 }
 
 #pragma mark IBActions
@@ -141,7 +141,6 @@
     for (id i in t)
         [self processFiles:@[[i properties][@"filepath"]]];
 	[self updateUI];
-	[t release];
 }
 
 - (IBAction)removeClicked:(id)sender
@@ -237,7 +236,7 @@
 {
     // Credits
     NSAttributedString *creditsString;
-    creditsString = [[[NSAttributedString alloc] initWithPath:[[NSBundle mainBundle] pathForResource:@"Credits" ofType:@"rtf"] documentAttributes:nil] autorelease];
+    creditsString = [[NSAttributedString alloc] initWithPath:[[NSBundle mainBundle] pathForResource:@"Credits" ofType:@"rtf"] documentAttributes:nil];
     [[textView_credits textStorage] setAttributedString:creditsString];
     
     // Version
@@ -266,11 +265,11 @@
 // this probably needs to be rewritten to be more efficient, and clean
 - (void)addFiles:(NSTimer *)timer
 {
-	NSAutoreleasePool *autoreleasePool = [[NSAutoreleasePool alloc] init];
-	SPFileEntry *content;
+	@autoreleasepool {
+		SPFileEntry *content;
     int do_endProgress = 0; // we use this to make sure we only call endProgress when needed
     
-	while ((content = [pendingFiles dequeue])) {
+		while ((content = [pendingFiles dequeue])) {
         if (!continueProcessing)
             break;
         
@@ -369,7 +368,7 @@
         
         [records addObject:newEntry];
         [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:YES];
-	}
+		}
     // 4 times I had to add this LAME! C'mon Apple, get yer thread on!
     if (!continueProcessing) {
         [pendingFiles dump];
@@ -381,7 +380,7 @@
         [self performSelectorOnMainThread:@selector(endProgress) withObject:nil waitUntilDone:YES];
     }
     
-    [autoreleasePool drain];
+    }
 }
 
 // adds files to the tableview, which means it also starts hashing them and all the other fun stuff
@@ -389,17 +388,17 @@
 {
 	NSTimer *fileAddingTimer;
 	
-	NSAutoreleasePool *autoreleasePool = [[NSAutoreleasePool alloc] init];
-	fileAddingTimer = [[NSTimer scheduledTimerWithTimeInterval:0.5
+	@autoreleasepool {
+		fileAddingTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                            target:self
                                                          selector:@selector(addFiles:)
                                                          userInfo:nil
-                                                          repeats:YES] retain];
-	
-	CFRunLoopRun();
-	
-	[fileAddingTimer invalidate]; [fileAddingTimer release];
-	[autoreleasePool drain];
+                                                          repeats:YES];
+		
+		CFRunLoopRun();
+		
+		[fileAddingTimer invalidate]; 
+	}
 }
 
 // remove selected records from our table view
@@ -542,7 +541,7 @@
         [pendingFiles enqueue:newEntry];
 		break;
 	noSTR:
-		[newEntry release];
+		newEntry = nil;
     }
 }
 
@@ -649,14 +648,13 @@
 	}
 }
 
-- (void)sortWithDescriptor:(id)descriptor
+- (void)sortWithDescriptor:(NSSortDescriptor*)descriptor
 {
 	NSMutableArray *sorted = [[NSMutableArray alloc] initWithCapacity:1];
 	[sorted addObjectsFromArray:[records sortedArrayUsingDescriptors:@[descriptor]]];
 	[records removeAllObjects];
 	[records addObjectsFromArray:sorted];
 	[self updateUI];
-	[sorted release];
 }
 
 
@@ -671,7 +669,6 @@
     
     [toolbar setDelegate: self];
     [window_main setToolbar: toolbar];
-	[toolbar release];
 }
 
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)flag 
@@ -681,74 +678,74 @@
     
     if ([itemIdent isEqual: AddToolbarIdentifier]) {
         
-        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
 
         [toolbarItem setLabel: @"Add"];
         [toolbarItem setPaletteLabel: @"Add"];
         [toolbarItem setToolTip: @"Add a file or the contents of a folder"];
-        [toolbarItem setImage: [NSImage imageNamed: @"edit_add.png"]];
+        [toolbarItem setImage: [NSImage imageNamed: @"edit_add"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(addClicked:)];
         [toolbarItem setAutovalidates: NO];
         
     } else if ([itemIdent isEqual: RemoveToolbarIdentifier]) {
         
-        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
         
         [toolbarItem setLabel: @"Remove"];
         [toolbarItem setPaletteLabel: @"Remove"];
         [toolbarItem setToolTip: @"Remove selected items or prompt to remove all items if none are selected"];
-        [toolbarItem setImage: [NSImage imageNamed: @"edit_remove.png"]];
+        [toolbarItem setImage: [NSImage imageNamed: @"edit_remove"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(removeClicked:)];
         [toolbarItem setAutovalidates: NO];
         
     } else if ([itemIdent isEqual: RecalculateToolbarIdentifier]) {
         
-        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
 
         [toolbarItem setLabel: @"Recalculate"];
         [toolbarItem setPaletteLabel: @"Recalculate"];
         [toolbarItem setToolTip: @"Recalculate checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: @"reload.png"]];
+        [toolbarItem setImage: [NSImage imageNamed: @"reload"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(recalculateClicked:)];
         [toolbarItem setAutovalidates: NO];
         
     } else if ([itemIdent isEqual: StopToolbarIdentifier]) {
         
-        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
         
         [toolbarItem setLabel: @"Stop"];
         [toolbarItem setPaletteLabel: @"Stop"];
         [toolbarItem setToolTip: @"Stop calculating checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: @"stop.png"]];
+        [toolbarItem setImage: [NSImage imageNamed: @"stop"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(stopClicked:)];
         [toolbarItem setAutovalidates: NO];
         
     } else if ([itemIdent isEqual: SaveToolbarIdentifier]) {
         
-        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
 
         [toolbarItem setLabel: @"Save"];
         [toolbarItem setPaletteLabel: @"Save"];
         [toolbarItem setToolTip: @"Save current state"];
-        [toolbarItem setImage: [NSImage imageNamed: @"1downarrow.png"]];
+        [toolbarItem setImage: [NSImage imageNamed: @"1downarrow"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(saveClicked:)];
         [toolbarItem setAutovalidates: NO];
         
     } else if ([itemIdent isEqual: ChecksumToolbarIdentifier]) {
         
-        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
 
         [toolbarItem setLabel: @"Checksum"];
         [toolbarItem setPaletteLabel: @"Checksum"];
         [toolbarItem setToolTip: @"Checksum algorithm to use"];
         [toolbarItem setView: view_checksum];
         [toolbarItem setMinSize:NSMakeSize(106, NSHeight([view_checksum frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(106,NSHeight([view_checksum frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(106, NSHeight([view_checksum frame]))];
         
 	} else {
         toolbarItem = nil;

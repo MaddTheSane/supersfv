@@ -23,7 +23,7 @@
 
 typedef unsigned char u8;
 
-@interface SPSuperSFV : NSObject <NSToolbarDelegate>
+@interface SPSuperSFV : NSObject <NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
     IBOutlet NSButton *button_add;
     IBOutlet NSButton *button_closeLicense;
@@ -48,14 +48,14 @@ typedef unsigned char u8;
     IBOutlet NSView *view_checksum;
     IBOutlet NSWindow *window_about;
     IBOutlet NSWindow *window_main;
-    IBOutlet SPTableView *tableView_fileList;
     
     NSMutableArray *records;
     NSImageCell *cell;
     AIQueue *pendingFiles;
-    //NSAutoreleasePool *autoreleasePool;
     BOOL continueProcessing;
 }
+
+@property (weak) IBOutlet SPTableView *tableView_fileList;
 - (IBAction)aboutIconClicked:(id)sender;
 - (IBAction)addClicked:(id)sender;
 - (IBAction)closeLicense:(id)sender;
@@ -81,15 +81,8 @@ typedef unsigned char u8;
 - (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 @property (readonly, copy) NSString *_applicationVersion;
 
-- (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row;
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView;
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op;
-- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation;
-- (void)tableView:(NSTableView *)tableView didClickTableColumn:(NSTableColumn *)tableColumn;
-- (void)sortWithDescriptor:(id)descriptor;
+- (void)sortWithDescriptor:(NSSortDescriptor*)descriptor;
 
 - (void)setup_toolbar;
-- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)flag;
-- (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar;
-- (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar;
+
 @end

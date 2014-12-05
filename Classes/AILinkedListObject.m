@@ -20,16 +20,11 @@
 
 - (AILinkedListObject *)initWithObject:(id)theObject {
 	if ((self = [super init])) {
-		object = [theObject retain];
+		object = theObject;
 		last = nil;
 		next = nil;
 	}
 	return self;
-}
-
-- (void)dealloc {
-	[object release];
-	[super dealloc];
 }
 
 - (void)setNextObject:(AILinkedListObject *)theObject {

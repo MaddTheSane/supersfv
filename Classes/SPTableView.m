@@ -18,12 +18,9 @@
  */
 
 #import "SPTableView.h"
+#import "SPSuperSFV.h"
 
 @implementation SPTableView
-- (NSArray *)getSelectedPaths
-{
-	return [[self dataSource] getSelectedPaths];
-}
 
 - (void)keyDown:(NSEvent *)theEvent
 {
@@ -33,4 +30,5 @@
         default:  [super keyDown:theEvent]; break;
     }
 }
+
 @end

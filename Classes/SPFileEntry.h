@@ -22,7 +22,7 @@
 
 @interface SPFileEntry : NSObject
 @property (copy) NSMutableDictionary *properties;
-@property (readonly, retain) NSArray *defaultKeys;
+@property (readonly, strong) NSArray *defaultKeys;
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 
