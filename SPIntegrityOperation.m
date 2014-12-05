@@ -28,7 +28,7 @@
     return [self initWithFileEntry:entry target:object algorithm:-1];
 }
 
-- (id)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(int)algorithm
+- (id)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm
 {
     if (self = [super init])
     {
@@ -54,8 +54,8 @@
 
 	if (![self isCancelled])
 	{
-        int bytes, algorithm;
-        uint8_t data[1024], *dgst; // buffers
+        SPCryptoAlgorithm algorithm;
+        uint8_t *dgst; // buffers
         
         NSString *file = [[fileEntry properties] objectForKey:@"filepath"];
         NSString *expectedHash = [[fileEntry properties] objectForKey:@"expected"];
@@ -86,10 +86,10 @@
         {
             algorithm = cryptoAlgorithm;
         }
-        
-        FILE *inFile = fopen([file cStringUsingEncoding:NSUTF8StringEncoding], "rb");
-        
-        if (inFile == NULL)
+		
+		NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:file];
+		
+        if (fileHandle == NULL)
             goto cancelled;
         
 //        [target performSelectorOnMainThread:@selector(initProgress:)
@@ -112,27 +112,27 @@
         } else { // algorithm == 2
             SHA1_Init(&sha_ctx);
         }
-        
-        while ((bytes = fread (data, 1, 1024, inFile)) != 0) {
+		
+		NSData *fileData = nil;
+		
+        while ((fileData = [fileHandle readDataOfLength:1024]).length > 0) {
             if ([self isCancelled])
                 break;
             
             switch (algorithm) {
                 case 0:
-                    crc = crc32(crc, data, bytes);
+                    crc = crc32(crc, fileData.bytes, fileData.length);
                     break;
                 case 1:
-                    MD5_Update(&md5_ctx, data, bytes);
+                    MD5_Update(&md5_ctx, fileData.bytes, fileData.length);
                     break;
                 case 2:
-                    SHA1_Update(&sha_ctx, data, bytes);
+                    SHA1_Update(&sha_ctx, fileData.bytes, fileData.length);
                     break;
             }
         }
-        
-        fclose(inFile);
-
-        NSLog(@"Finished with file %@", [[fileEntry properties] objectForKey:@"filepath"]);
+		[fileHandle release];
+		NSLog(@"Finished with file %@", [[fileEntry properties] objectForKey:@"filepath"]);
         
 
         if ([self isCancelled])

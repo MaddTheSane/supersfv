@@ -51,7 +51,7 @@
     records = [[NSMutableArray alloc] init];
     queue = [[NSOperationQueue alloc] init];
     // TODO: We want to run several ops at the same time in the future
-    [queue setMaxConcurrentOperationCount:1];
+    [queue setMaxConcurrentOperationCount:NSOperationQueueDefaultMaxConcurrentOperationCount];
     
     [self setup_toolbar];
 

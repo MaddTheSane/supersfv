@@ -25,17 +25,23 @@
 #include <openssl/sha.h>
 #include "crc32.h"
 
+typedef NS_ENUM(int, SPCryptoAlgorithm) {
+	SPCryptoAlgorithmUnknown = -1,
+	SPCryptoAlgorithmCRC = 0,
+	SPCryptoAlgorithmMD5,
+	SPCryptoAlgorithmSHA1
+};
 
 @interface SPIntegrityOperation : NSOperation {
 @private
 	SPFileEntry *fileEntry;
     NSObject *target;
-    int cryptoAlgorithm;
+    SPCryptoAlgorithm cryptoAlgorithm;
     NSString *hash;
 }
 
 @property (readonly) NSString *hash;
 
 - (id)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object;
-- (id)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(int)algorithm;
+- (id)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
 @end
