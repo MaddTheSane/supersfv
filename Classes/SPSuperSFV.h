@@ -20,7 +20,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SPTableView.h"
 
-@interface SPSuperSFV : NSObject <NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate>
+@interface SPSuperSFV : NSObject <NSApplicationDelegate, NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
     IBOutlet NSButton *button_add;
     IBOutlet NSButton *button_closeLicense;
@@ -73,8 +73,5 @@
 - (void)sortWithDescriptor:(NSSortDescriptor*)descriptor;
 
 - (void)setup_toolbar;
-- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)flag;
-- (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar;
-- (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar;
 
 @end
