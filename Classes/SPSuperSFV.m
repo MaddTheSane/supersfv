@@ -129,7 +129,7 @@
     [oPanel setCanChooseFiles:YES];
     [oPanel setCanChooseDirectories:YES];
     [oPanel beginSheetModalForWindow:window_main completionHandler:^(NSInteger result) {
-        if (result == NSOKButton) {
+        if (result == NSModalResponseOK) {
             NSArray *URLs = [oPanel URLs];
             NSMutableArray *paths = [[NSMutableArray alloc] initWithCapacity:[URLs count]];
             for (NSURL *url in URLs) {
@@ -153,26 +153,30 @@
 
 - (IBAction)removeClicked:(id)sender
 {
-    if ((![tableView_fileList numberOfSelectedRows]) && ([records count] > 0))
-        NSBeginAlertSheet(@"Confirm Removal", @"Removal All", @"Cancel", nil, window_main, self,
-                          @selector(didEndRemoveAllSheet:returnCode:contextInfo:),
-                          nil, nil, @"You sure you want to ditch all of the entries? They're so cute!");
-    else
+    if ((![tableView_fileList numberOfSelectedRows]) && ([records count] > 0)) {
+        NSAlert *alert = [NSAlert new];
+        alert.messageText = @"Confirm Removal";
+        alert.informativeText = @"You sure you want to ditch all of the entries? They're so cute!";
+        [alert addButtonWithTitle:@"Removal All"];
+        [alert addButtonWithTitle:@"Cancel"];
+        
+        [alert beginSheetModalForWindow:window_main completionHandler:^(NSModalResponse returnCode) {
+            if (returnCode == NSAlertFirstButtonReturn) {
+                [records removeAllObjects];
+                [self updateUI];
+            }
+        }];
+    } else {
         [self removeSelectedRecords:nil];
-}
-
-- (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-    if (returnCode == NSOKButton) {
-        [records removeAllObjects];
-        [self updateUI];
     }
 }
 
 - (IBAction)saveClicked:(id)sender
 {
-    if (![records count])
+    if (![records count]) {
+        NSBeep();
         return;
+    }
 
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     [sPanel setPrompt:@"Save"];
@@ -180,7 +184,7 @@
     sPanel.allowedFileTypes = @[@"sfv"];
     
     [sPanel beginSheetModalForWindow:window_main completionHandler:^(NSInteger result) {
-        if (result == NSOKButton) {
+        if (result == NSModalResponseOK) {
             if ([records count]) {
                 // shameless plug to start out with
                 NSString *output = [NSString stringWithFormat:@"; Created using SuperSFV v%@ on Mac OS X", [self _applicationVersion]];
@@ -606,7 +610,7 @@
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)flag
 {
 
-    NSToolbarItem *toolbarItem = nil;
+    NSToolbarItem *toolbarItem;
 
     if ([itemIdent isEqual: AddToolbarIdentifier]) {
         
@@ -615,7 +619,7 @@
         [toolbarItem setLabel: @"Add"];
         [toolbarItem setPaletteLabel: @"Add"];
         [toolbarItem setToolTip: @"Add a file or the contents of a folder"];
-        [toolbarItem setImage: [NSImage imageNamed: @"edit_add"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(addClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -627,7 +631,7 @@
         [toolbarItem setLabel: @"Remove"];
         [toolbarItem setPaletteLabel: @"Remove"];
         [toolbarItem setToolTip: @"Remove selected items or prompt to remove all items if none are selected"];
-        [toolbarItem setImage: [NSImage imageNamed: @"edit_remove"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRemoveTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(removeClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -639,7 +643,7 @@
         [toolbarItem setLabel: @"Recalculate"];
         [toolbarItem setPaletteLabel: @"Recalculate"];
         [toolbarItem setToolTip: @"Recalculate checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: @"reload"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRefreshFreestandingTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(recalculateClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -651,7 +655,7 @@
         [toolbarItem setLabel: @"Stop"];
         [toolbarItem setPaletteLabel: @"Stop"];
         [toolbarItem setToolTip: @"Stop calculating checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: @"stop"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameStopProgressFreestandingTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(stopClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -663,7 +667,7 @@
         [toolbarItem setLabel: @"Save"];
         [toolbarItem setPaletteLabel: @"Save"];
         [toolbarItem setToolTip: @"Save current state"];
-        [toolbarItem setImage: [NSImage imageNamed: @"1downarrow"]];
+        [toolbarItem setImage: [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericHardDiskIcon)]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(saveClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -677,7 +681,7 @@
         [toolbarItem setToolTip: @"Checksum algorithm to use"];
         [toolbarItem setView: view_checksum];
         [toolbarItem setMinSize:NSMakeSize(106, NSHeight([view_checksum frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(106,NSHeight([view_checksum frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(106, NSHeight([view_checksum frame]))];
 
 	} else {
         toolbarItem = nil;

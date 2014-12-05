@@ -67,8 +67,7 @@
 - (void)parseSFVFile:(NSString *) filepath;
 - (void)processFiles:(NSArray *) filenames;
 - (void)removeSelectedRecords:(id) sender;
-- (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (NSString *)_applicationVersion;
+@property (readonly, copy) NSString *_applicationVersion;
 
 - (void)sortWithDescriptor:(NSSortDescriptor*)descriptor;
 
