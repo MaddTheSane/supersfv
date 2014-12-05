@@ -24,6 +24,6 @@
 @property (copy) NSMutableDictionary *properties;
 @property (readonly, retain) NSArray *defaultKeys;
 
-- (instancetype)init;
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 @end

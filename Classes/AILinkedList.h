@@ -31,6 +31,6 @@
 - (id)removeObjectAtFront; /* O(1) */
 - (id)removeObjectAtEnd; /* O(1) */
 
-- (instancetype)init;
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 @end

@@ -37,7 +37,7 @@
 #pragma mark Initialization (App launching)
 + (void)initialize {
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-    [dictionary setObject:@"CRC32" forKey:@"checksum_algorithm"]; // default for most SFV programs
+    dictionary[@"checksum_algorithm"] = @"CRC32"; // default for most SFV programs
     [[NSUserDefaultsController sharedUserDefaultsController] setInitialValues:dictionary];
 }
 
@@ -68,7 +68,7 @@
     
     // register for drag and drop on the table view
     [tableView_fileList registerForDraggedTypes: 
-        [NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+        @[NSFilenamesPboardType]];
     
     // make the window pertee and show it
     [button_stop setEnabled:NO];
@@ -138,9 +138,8 @@
     NSMutableArray *t = [[NSMutableArray alloc] initWithCapacity:1];
 	[t addObjectsFromArray:records];
 	[records removeAllObjects];
-    int i;
     for (id i in t)
-        [self processFiles:[NSArray arrayWithObject:[[i properties] objectForKey:@"filepath"]]];
+        [self processFiles:@[[i properties][@"filepath"]]];
 	[self updateUI];
 	[t release];
 }
@@ -192,12 +191,12 @@
             NSEnumerator *e = [records objectEnumerator];
             SPFileEntry *entry;
             while (entry = [e nextObject]) {
-                if ((![[[entry properties] objectForKey:@"result"] isEqualToString:@"Missing"])
-                    && (![[[entry properties] objectForKey:@"result"] isEqualToString:@""])) {
+                if ((![[entry properties][@"result"] isEqualToString:@"Missing"])
+                    && (![[entry properties][@"result"] isEqualToString:@""])) {
 
                     output = [output stringByAppendingFormat:@"\n%@ %@", 
-                                [[[entry properties] objectForKey:@"filepath"] lastPathComponent],
-                                [[entry properties] objectForKey:@"result"]];
+                                [[entry properties][@"filepath"] lastPathComponent],
+                                [entry properties][@"result"]];
                 }
             }
             
@@ -260,7 +259,7 @@
 #pragma mark Runloop
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename
 {
-    [self processFiles:[NSArray arrayWithObject:filename]];
+    [self processFiles:@[filename]];
     return YES;
 }
 
@@ -280,8 +279,8 @@
         int bytes, algorithm;
         u8 data[1024], *dgst; // buffers
         
-        NSString *file = [[content properties] objectForKey:@"filepath"],
-                 *hash = [[content properties] objectForKey:@"expected"],
+        NSString *file = [content properties][@"filepath"],
+                 *hash = [content properties][@"expected"],
                  *result;
         
         NSFileManager *dm = [NSFileManager defaultManager];
@@ -295,11 +294,10 @@
         if (inFile == NULL)
             break;
         
-        [self performSelectorOnMainThread:@selector(initProgress:) withObject:[NSArray arrayWithObjects:
-            [NSString stringWithFormat:@"Performing %@ on %@", [popUpButton_checksum itemTitleAtIndex:algorithm],
+        [self performSelectorOnMainThread:@selector(initProgress:) withObject:@[[NSString stringWithFormat:@"Performing %@ on %@", [popUpButton_checksum itemTitleAtIndex:algorithm],
                 [file lastPathComponent]],
-            [NSNumber numberWithDouble:0.0], 
-            [fileAttributes objectForKey:NSFileSize], nil] waitUntilDone:YES];
+            @0.0, 
+            fileAttributes[NSFileSize]] waitUntilDone:YES];
         
         do_endProgress++; // don't care about doing endProgress unless the progress has been init-ed
         
@@ -330,8 +328,7 @@
                     SHA1_Update(&sha_ctx, data, bytes);
                     break;
             }
-            [self performSelectorOnMainThread:@selector(updateProgress:) withObject:[NSArray arrayWithObjects:
-                [NSNumber numberWithDouble:[progressBar_progress doubleValue]+(double)bytes], @"", nil] waitUntilDone:YES];                
+            [self performSelectorOnMainThread:@selector(updateProgress:) withObject:@[@([progressBar_progress doubleValue]+(double)bytes), @""] waitUntilDone:YES];                
         }
         
         fclose(inFile);
@@ -361,13 +358,13 @@
         
         if (![hash isEqualToString:@""])
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:[NSArray arrayWithObjects:[[hash uppercaseString] isEqualToString:result]?[NSImage imageNamed:@"button_ok"]:[NSImage imageNamed:@"button_cancel"],
-                            file, [hash uppercaseString], result, nil] 
+                        initWithObjects:@[[[hash uppercaseString] isEqualToString:result]?[NSImage imageNamed:@"button_ok"]:[NSImage imageNamed:@"button_cancel"],
+                            file, [hash uppercaseString], result] 
                                 forKeys:[newEntry defaultKeys]]];
         else
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed:@"button_ok"],
-                            file, result, result, nil]
+                        initWithObjects:@[[NSImage imageNamed:@"button_ok"],
+                            file, result, result]
                                 forKeys:[newEntry defaultKeys]]];
         
         [records addObject:newEntry];
@@ -433,18 +430,18 @@
     NSEnumerator *e = [records objectEnumerator];
     SPFileEntry *entry;
     while (entry = [e nextObject]) {
-        if ([[[entry properties] objectForKey:@"result"] isEqualToString:@"Missing"] ||
-            [[[entry properties] objectForKey:@"expected"] isEqualToString:@"Unknown (not recognized)"]) {
+        if ([[entry properties][@"result"] isEqualToString:@"Missing"] ||
+            [[entry properties][@"expected"] isEqualToString:@"Unknown (not recognized)"]) {
                 error_count++;
                 continue;
         }
         
-        if (![[[entry properties] objectForKey:@"expected"] isEqualToString:[[entry properties] objectForKey:@"result"]]) {
+        if (![[entry properties][@"expected"] isEqualToString:[entry properties][@"result"]]) {
             failure_count++;
             continue;
         }
         
-        if ([[[entry properties] objectForKey:@"expected"] isEqualToString:[[entry properties] objectForKey:@"result"]]) {
+        if ([[entry properties][@"expected"] isEqualToString:[entry properties][@"result"]]) {
             verified_count++;
             continue;
         }
@@ -480,12 +477,12 @@
                 NSArray *dirContents = [dm contentsOfDirectoryAtPath:file error:&err];
                 int i;
                 for (i = 0; i < [dirContents count]; i++) {
-                    [self processFiles:[NSArray arrayWithObject:[file stringByAppendingPathComponent:[dirContents objectAtIndex:i]]]];
+                    [self processFiles:@[[file stringByAppendingPathComponent:dirContents[i]]]];
                 }
                 continue;
             }
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"button_cancel.png"], file, @"", @"", nil] 
+                        initWithObjects:@[[NSImage imageNamed: @"button_cancel.png"], file, @"", @""] 
                                 forKeys:[newEntry defaultKeys]]];
             
             [pendingFiles enqueue:newEntry];
@@ -518,7 +515,7 @@
         // file doesn't exist...
         if (![[NSFileManager defaultManager] fileExistsAtPath:newPath]) {
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"error.png"], newPath, hash, @"Missing", nil] 
+                        initWithObjects:@[[NSImage imageNamed: @"error.png"], newPath, hash, @"Missing"] 
                                 forKeys:[newEntry defaultKeys]]];
             errc++;
         }
@@ -526,8 +523,8 @@
         // length doesn't match CRC32, MD5 or SHA-1 respectively
         if ([hash length] != 8 && [hash length] != 32 && [hash length] != 40) {
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"error.png"],newPath, 
-                                            @"Unknown (not recognized)",[[newEntry properties] objectForKey:@"result"], nil] 
+                        initWithObjects:@[[NSImage imageNamed: @"error.png"],newPath, 
+                                            @"Unknown (not recognized)",[newEntry properties][@"result"]] 
                                 forKeys:[newEntry defaultKeys]]];
             errc++;
         }
@@ -539,7 +536,7 @@
             continue;
         }
         // assume it'll fail until proven otherwise
-        [newEntry setProperties:[NSMutableDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"button_cancel.png"], newPath, hash, @"", nil] 
+        [newEntry setProperties:[NSMutableDictionary dictionaryWithObjects:@[[NSImage imageNamed: @"button_cancel.png"], newPath, hash, @""] 
                                 forKeys:[newEntry defaultKeys]]];
         
         [pendingFiles enqueue:newEntry];
@@ -553,19 +550,19 @@
 // (NSNumber *)currentProgress, (NSString *)description
 - (void)updateProgress:(NSArray *)args
 {
-    if (![[args objectAtIndex:1] isEqualToString:@""])
-        [textField_status setStringValue:[args objectAtIndex:1]];
-    [progressBar_progress setDoubleValue:[[args objectAtIndex:0] doubleValue]];
+    if (![args[1] isEqualToString:@""])
+        [textField_status setStringValue:args[1]];
+    [progressBar_progress setDoubleValue:[args[0] doubleValue]];
 }
 
 // expects an NSArray containing:
 // (NSString *)description, (NSNumber *)minValue, (NSNumber *)maxValue
 - (void)initProgress:(NSArray *)args
 {
-    if (![[args objectAtIndex:0] isEqualToString:@""])
-        [textField_status setStringValue:[args objectAtIndex:0]];
-    [progressBar_progress setMinValue:[[args objectAtIndex:1] doubleValue]];
-    [progressBar_progress setMaxValue:[[args objectAtIndex:2] doubleValue]];
+    if (![args[0] isEqualToString:@""])
+        [textField_status setStringValue:args[0]];
+    [progressBar_progress setMinValue:[args[1] doubleValue]];
+    [progressBar_progress setMaxValue:[args[2] doubleValue]];
     [progressBar_progress setDoubleValue:0.0];
 
     if ([progressBar_progress isHidden])
@@ -595,7 +592,7 @@
 
 - (NSString *)_applicationVersion
 {
-    NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+    NSString *version = [[NSBundle mainBundle] infoDictionary][@"CFBundleVersion"];
     return [NSString stringWithFormat:@"%@",(version ? version : @"")];
 }
 
@@ -603,10 +600,10 @@
 - (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row
 {
     NSString *key = [column identifier];
-    SPFileEntry *newEntry = [records objectAtIndex:row];
+    SPFileEntry *newEntry = records[row];
     if ([key isEqualToString:@"filepath"])
-        return [[[newEntry properties] objectForKey:@"filepath"] lastPathComponent];
-    return [[newEntry properties] objectForKey:key];
+        return [[newEntry properties][@"filepath"] lastPathComponent];
+    return [newEntry properties][key];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
@@ -637,8 +634,8 @@
 		NSArray *allColumns = [tableView_fileList tableColumns];
 		int i;
 		for (i = 0; i < [tableView_fileList numberOfColumns]; i++)
-			if ([allColumns objectAtIndex:i] != tableColumn)
-				[tableView_fileList setIndicatorImage:nil inTableColumn:[allColumns objectAtIndex:i]];
+			if (allColumns[i] != tableColumn)
+				[tableView_fileList setIndicatorImage:nil inTableColumn:allColumns[i]];
             
 		[tableView_fileList setHighlightedTableColumn:tableColumn];
 		
@@ -655,7 +652,7 @@
 - (void)sortWithDescriptor:(id)descriptor
 {
 	NSMutableArray *sorted = [[NSMutableArray alloc] initWithCapacity:1];
-	[sorted addObjectsFromArray:[records sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]]];
+	[sorted addObjectsFromArray:[records sortedArrayUsingDescriptors:@[descriptor]]];
 	[records removeAllObjects];
 	[records addObjectsFromArray:sorted];
 	[self updateUI];
@@ -760,20 +757,20 @@
 }
 
 - (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
-    return [NSArray arrayWithObjects: AddToolbarIdentifier, RemoveToolbarIdentifier, 
+    return @[AddToolbarIdentifier, RemoveToolbarIdentifier, 
                             RecalculateToolbarIdentifier, NSToolbarSeparatorItemIdentifier, 
                             ChecksumToolbarIdentifier, NSToolbarFlexibleSpaceItemIdentifier, 
-                            SaveToolbarIdentifier, StopToolbarIdentifier, nil];
+                            SaveToolbarIdentifier, StopToolbarIdentifier];
     
 }
 
 
 - (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
-    return [NSArray arrayWithObjects: AddToolbarIdentifier, RecalculateToolbarIdentifier, 
+    return @[AddToolbarIdentifier, RecalculateToolbarIdentifier, 
                             StopToolbarIdentifier, SaveToolbarIdentifier, ChecksumToolbarIdentifier, 
                             NSToolbarPrintItemIdentifier, NSToolbarCustomizeToolbarItemIdentifier, 
                             NSToolbarFlexibleSpaceItemIdentifier, NSToolbarSpaceItemIdentifier, 
-                            NSToolbarSeparatorItemIdentifier, RemoveToolbarIdentifier, nil];
+                            NSToolbarSeparatorItemIdentifier, RemoveToolbarIdentifier];
 }
 
 @end

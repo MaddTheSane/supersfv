@@ -79,7 +79,7 @@ typedef unsigned char u8;
 - (void)didEndSaveSheet:(NSSavePanel *)savePanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)didEndOpenSheet:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (NSString *)_applicationVersion;
+@property (readonly, copy) NSString *_applicationVersion;
 
 - (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row;
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView;

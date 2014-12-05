@@ -27,8 +27,8 @@
 - (instancetype) init
 {
     if (self = [super init]) {
-        NSArray *values = [NSArray arrayWithObjects: [[NSImage alloc] init], @"/", @"", @"", nil];
-        keys   = [NSArray arrayWithObjects: @"status", @"filepath", @"expected", @"result", nil]; 
+        NSArray *values = @[[[NSImage alloc] init], @"/", @"", @""];
+        keys   = @[@"status", @"filepath", @"expected", @"result"]; 
         
         properties = [[NSMutableDictionary alloc] initWithObjects: values forKeys: keys];
     }

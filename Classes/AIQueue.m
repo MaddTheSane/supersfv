@@ -10,6 +10,11 @@
 
 
 @implementation AIQueue
+
+- (instancetype)init {
+	return self = [super init];
+}
+
 - (void)enqueue:(id)object {
 	@synchronized(self) {
 		[self insertObjectAtEnd:object];

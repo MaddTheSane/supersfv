@@ -10,7 +10,7 @@
 
 /* For use by AILinkedList, you probably don't need this. */
 @interface AILinkedListObject : NSObject
-- (instancetype)initWithObject:(id)theObject;
+- (instancetype)initWithObject:(id)theObject NS_DESIGNATED_INITIALIZER;
 
 @property (strong, readonly) id object;
 
