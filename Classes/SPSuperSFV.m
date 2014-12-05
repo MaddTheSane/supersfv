@@ -18,7 +18,7 @@
  */
 
 #import "SPSuperSFV.h"
-#import "SPFileEntry.h"
+#import "SuperSFV-Swift.h"
 
 #include <openssl/md5.h>
 #include <openssl/sha.h>
@@ -186,9 +186,7 @@
             // shameless plug to start out with
             NSString *output = [NSString stringWithFormat:@"; Created using SuperSFV v%@ on Mac OS X", [self _applicationVersion]];
             
-            NSEnumerator *e = [records objectEnumerator];
-            SPFileEntry *entry;
-            while (entry = [e nextObject]) {
+            for (FileEntry *entry in records) {
                 if ((![[entry properties][@"result"] isEqualToString:@"Missing"])
                     && (![[entry properties][@"result"] isEqualToString:@""])) {
 
@@ -265,7 +263,7 @@
 - (void)addFiles:(NSTimer *)timer
 {
 	@autoreleasepool {
-		SPFileEntry *content;
+		FileEntry *content;
     int do_endProgress = 0; // we use this to make sure we only call endProgress when needed
     
 		while ((content = [pendingFiles dequeue])) {
@@ -352,7 +350,7 @@
                 free(dgst);
         }
         
-        SPFileEntry *newEntry = [[SPFileEntry alloc] init];
+        FileEntry *newEntry = [[FileEntry alloc] init];
         
         if (![hash isEqualToString:@""])
             [newEntry setProperties:[[NSMutableDictionary alloc] 
@@ -425,9 +423,7 @@
     // other 'stats' .. may be a bit sloppy
     int error_count = 0, failure_count = 0, verified_count = 0;
     
-    NSEnumerator *e = [records objectEnumerator];
-    SPFileEntry *entry;
-    while (entry = [e nextObject]) {
+    for (FileEntry *entry in records) {
         if ([[entry properties][@"result"] isEqualToString:@"Missing"] ||
             [[entry properties][@"expected"] isEqualToString:@"Unknown (not recognized)"]) {
                 error_count++;
@@ -460,7 +456,7 @@
     NSFileManager *dm = [NSFileManager defaultManager];
         
     for (NSString *file in filenames) {
-        SPFileEntry *newEntry = [[SPFileEntry alloc] init];
+        FileEntry *newEntry = [[FileEntry alloc] init];
         if ([[[file lastPathComponent] substringWithRange:NSMakeRange(0, 1)] isEqualToString:@"."])
             continue;  // ignore hidden files
         if ([[[file pathExtension] lowercaseString] isEqualToString:@"sfv"]) {
@@ -498,7 +494,7 @@
         int errc = 0; // error count
         NSString *newPath = nil;
         NSString *hash = nil;
-        SPFileEntry *newEntry = [[SPFileEntry alloc] init];
+        FileEntry *newEntry = [[FileEntry alloc] init];
         
         entry = [entry stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if ([entry isEqualToString:@""])
@@ -598,7 +594,7 @@
 - (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row
 {
     NSString *key = [column identifier];
-    SPFileEntry *newEntry = records[row];
+    FileEntry *newEntry = records[row];
     if ([key isEqualToString:@"filepath"])
         return [[newEntry properties][@"filepath"] lastPathComponent];
     return [newEntry properties][key];
