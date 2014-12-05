@@ -45,8 +45,8 @@
 		5542CD161A3173920081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5542CD1A1A3174A70081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		558C332713A91A3E00EC0CAE /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = usr/lib/libcrypto.dylib; sourceTree = SDKROOT; };
-		6D9FD366109DD83600729576 /* SPIntegrityOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPIntegrityOperation.h; sourceTree = "<group>"; };
-		6D9FD367109DD83600729576 /* SPIntegrityOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPIntegrityOperation.m; sourceTree = "<group>"; };
+		6D9FD366109DD83600729576 /* SPIntegrityOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPIntegrityOperation.h; sourceTree = "<group>"; usesTabs = 0; };
+		6D9FD367109DD83600729576 /* SPIntegrityOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPIntegrityOperation.m; sourceTree = "<group>"; usesTabs = 0; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		8D1107320486CEB800E47090 /* SuperSFV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SuperSFV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
