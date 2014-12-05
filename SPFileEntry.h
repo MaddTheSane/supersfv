@@ -20,12 +20,10 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface SPFileEntry : NSObject {
-    NSMutableDictionary * properties;
-    NSArray *keys;
-}
+@interface SPFileEntry : NSObject
+@property (copy) NSMutableDictionary *properties;
+@property (readonly, retain) NSArray *defaultKeys;
 
-- (NSMutableDictionary*)properties;
-- (void)setProperties: (NSDictionary *)newProperties;
-- (NSArray*)defaultKeys;
+- (instancetype)init;
+
 @end

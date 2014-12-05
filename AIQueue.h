@@ -9,9 +9,10 @@
 #import "AILinkedList.h"
 
 
-@interface AIQueue : AILinkedList {
-	
-}
+@interface AIQueue : AILinkedList
+
+- (instancetype)init;
+
 - (void)enqueue:(id)object;
 - (id)dequeue;
 @end

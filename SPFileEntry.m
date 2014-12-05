@@ -21,8 +21,10 @@
 
 
 @implementation SPFileEntry
+@synthesize properties;
+@synthesize defaultKeys = keys;
 
-- (id) init
+- (instancetype) init
 {
     if (self = [super init]) {
         NSArray *values = [NSArray arrayWithObjects: [[NSImage alloc] init], @"/", @"", @"", nil];
@@ -31,15 +33,6 @@
         properties = [[NSMutableDictionary alloc] initWithObjects: values forKeys: keys];
     }
     return self;
-}
-
-- (void) setProperties: (NSDictionary *)newProperties
-{
-    if (properties != newProperties)
-    {
-        [properties release];
-        properties = [[NSMutableDictionary alloc] initWithDictionary: newProperties];
-    }    
 }
 
 - (id)valueForUndefinedKey:(id)key
@@ -57,17 +50,6 @@
 	}
     
     return [[self properties] valueForKey:key];
-}
-
-
--(NSMutableDictionary*)properties
-{
-    return properties;
-}
-
-- (NSArray*) defaultKeys
-{
-    return keys;
 }
 
 @end
