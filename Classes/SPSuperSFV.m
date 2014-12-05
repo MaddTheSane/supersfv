@@ -32,6 +32,15 @@
 #define StopToolbarIdentifier        @"Stop Toolbar Identifier"
 #define SaveToolbarIdentifier        @"Save Toolbar Identifier"
 
+static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
+{
+    if ([NSThread isMainThread]) {
+        theBlock();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), theBlock);
+    }
+}
+
 @implementation SPSuperSFV
 @synthesize tableView_fileList;
 
@@ -60,7 +69,7 @@
     [tableColumn setDataCell:cell];
     cell = [[NSImageCell alloc] initImageCell:nil];
     
-    // selecting items our table view and pressing the delete key
+    // selecting items in our table view and pressing the delete key
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(removeSelectedRecords:) 
                                                  name:@"RM_RECORD_FROM_LIST" 
@@ -140,7 +149,7 @@
 	[records removeAllObjects];
     for (id i in t)
         [self processFiles:@[[i properties][@"filepath"]]];
-	[self updateUI];
+    [self updateUI];
 }
 
 - (IBAction)removeClicked:(id)sender
@@ -209,7 +218,7 @@
 - (IBAction)showLicense:(id)sender
 {
     NSString *licensePath = [[NSBundle mainBundle] pathForResource:@"License" ofType:@"txt"];
-    [textView_license setString:[NSString stringWithContentsOfFile:licensePath]];
+    [textView_license setString:[NSString stringWithContentsOfFile:licensePath usedEncoding:NULL error:NULL]];
     
     [NSApp beginSheet:panel_license
        modalForWindow:window_about
@@ -280,7 +289,7 @@
                  *result;
         
         NSFileManager *dm = [NSFileManager defaultManager];
-        NSDictionary *fileAttributes = [dm fileAttributesAtPath:file traverseLink:NO];
+        NSDictionary *fileAttributes = [dm attributesOfItemAtPath:file error:NULL];
         
 
         algorithm = (![hash isEqualToString:@""]) ? ([hash length] == 8) ? 0 : ([hash length] == 32) ? 1 : ([hash length] == 40) ? 2 : 0 : [popUpButton_checksum indexOfSelectedItem];
@@ -290,10 +299,22 @@
         if (inFile == NULL)
             break;
         
-        [self performSelectorOnMainThread:@selector(initProgress:) withObject:@[[NSString stringWithFormat:@"Performing %@ on %@", [popUpButton_checksum itemTitleAtIndex:algorithm],
-                [file lastPathComponent]],
-            @0.0, 
-            fileAttributes[NSFileSize]] waitUntilDone:YES];
+            RunOnMainThreadSync(^{
+                textField_status.stringValue = [NSString stringWithFormat:@"Performing %@ on %@", [popUpButton_checksum itemTitleAtIndex:algorithm],
+                                                [file lastPathComponent]];
+                progressBar_progress.minValue = 0;
+                progressBar_progress.maxValue = [fileAttributes[NSFileSize] unsignedLongLongValue];
+                [progressBar_progress setDoubleValue:0.0];
+                
+                if (progressBar_progress.isHidden)
+                    progressBar_progress.hidden = NO;
+                
+                if (textField_status.isHidden)
+                    textField_status.hidden = NO;
+                
+                if (!button_stop.isEnabled)
+                    button_stop.enabled = YES;
+            });
         
         do_endProgress++; // don't care about doing endProgress unless the progress has been init-ed
         
@@ -324,7 +345,9 @@
                     SHA1_Update(&sha_ctx, data, bytes);
                     break;
             }
-            [self performSelectorOnMainThread:@selector(updateProgress:) withObject:@[@([progressBar_progress doubleValue]+(double)bytes), @""] waitUntilDone:YES];                
+            RunOnMainThreadSync(^{
+                [self updateProgress:@[@([progressBar_progress doubleValue]+(double)bytes), @""]];
+            });
         }
         
         fclose(inFile);
@@ -364,17 +387,23 @@
                                 forKeys:[newEntry defaultKeys]]];
         
         [records addObject:newEntry];
-        [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:YES];
+            RunOnMainThreadSync(^{
+                [self updateUI];
+            });
 		}
     // 4 times I had to add this LAME! C'mon Apple, get yer thread on!
     if (!continueProcessing) {
         [pendingFiles dump];
-        [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:YES];
+        RunOnMainThreadSync(^{
+            [self updateUI];
+        });
         continueProcessing = YES;
     }
     
     if (do_endProgress) {
-        [self performSelectorOnMainThread:@selector(endProgress) withObject:nil waitUntilDone:YES];
+        RunOnMainThreadSync(^{
+            [self endProgress];
+        });
     }
     
     }
@@ -486,11 +515,9 @@
 
 - (void)parseSFVFile:(NSString *) filepath
 {
-    NSArray *contents = [[NSString stringWithContentsOfFile:filepath] componentsSeparatedByString:@"\n"];
-    NSString *entry;
-    NSEnumerator *e = [contents objectEnumerator];
+    NSArray *contents = [[NSString stringWithContentsOfFile:filepath usedEncoding:NULL error:NULL] componentsSeparatedByString:@"\n"];
     
-    while (entry = [e nextObject]) {
+    for (__strong NSString *entry in contents) {
         int errc = 0; // error count
         NSString *newPath = nil;
         NSString *hash = nil;
@@ -498,9 +525,9 @@
         
         entry = [entry stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if ([entry isEqualToString:@""])
-            goto noSTR;
+            continue;
         if ([[entry substringWithRange:NSMakeRange(0, 1)] isEqualToString:@";"])
-            goto noSTR; // skip the line if it's a comment
+            continue; // skip the line if it's a comment
         
         NSRange r = [entry rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@" "] options:NSBackwardsSearch];
         newPath = [[filepath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[entry substringToIndex:r.location]];
@@ -534,9 +561,6 @@
                                 forKeys:[newEntry defaultKeys]]];
         
         [pendingFiles enqueue:newEntry];
-		break;
-	noSTR:
-		newEntry = nil;
     }
 }
 
