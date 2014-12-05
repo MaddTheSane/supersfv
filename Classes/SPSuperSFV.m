@@ -60,7 +60,7 @@
     [tableColumn setDataCell:cell];
     cell = [[NSImageCell alloc] initImageCell:nil];
     
-    // selecting items our table view and pressing the delete key
+    // selecting items in our table view and pressing the delete key
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(removeSelectedRecords:) 
                                                  name:@"RM_RECORD_FROM_LIST" 
@@ -140,7 +140,7 @@
 	[records removeAllObjects];
     for (id i in t)
         [self processFiles:@[[i properties][@"filepath"]]];
-	[self updateUI];
+    [self updateUI];
 }
 
 - (IBAction)removeClicked:(id)sender
@@ -211,7 +211,7 @@
 - (IBAction)showLicense:(id)sender
 {
     NSString *licensePath = [[NSBundle mainBundle] pathForResource:@"License" ofType:@"txt"];
-    [textView_license setString:[NSString stringWithContentsOfFile:licensePath]];
+    [textView_license setString:[NSString stringWithContentsOfFile:licensePath usedEncoding:NULL error:NULL]];
     
     [NSApp beginSheet:panel_license
        modalForWindow:window_about
@@ -282,7 +282,7 @@
                  *result;
         
         NSFileManager *dm = [NSFileManager defaultManager];
-        NSDictionary *fileAttributes = [dm fileAttributesAtPath:file traverseLink:NO];
+        NSDictionary *fileAttributes = [dm attributesOfItemAtPath:file error:NULL];
         
 
         algorithm = (![hash isEqualToString:@""]) ? ([hash length] == 8) ? 0 : ([hash length] == 32) ? 1 : ([hash length] == 40) ? 2 : 0 : [popUpButton_checksum indexOfSelectedItem];
@@ -490,11 +490,9 @@
 
 - (void)parseSFVFile:(NSString *) filepath
 {
-    NSArray *contents = [[NSString stringWithContentsOfFile:filepath] componentsSeparatedByString:@"\n"];
-    NSString *entry;
-    NSEnumerator *e = [contents objectEnumerator];
+    NSArray *contents = [[NSString stringWithContentsOfFile:filepath usedEncoding:NULL error:NULL] componentsSeparatedByString:@"\n"];
     
-    while (entry = [e nextObject]) {
+    for (__strong NSString *entry in contents) {
         int errc = 0; // error count
         NSString *newPath = nil;
         NSString *hash = nil;
@@ -502,9 +500,9 @@
         
         entry = [entry stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if ([entry isEqualToString:@""])
-            goto noSTR;
+            continue;
         if ([[entry substringWithRange:NSMakeRange(0, 1)] isEqualToString:@";"])
-            goto noSTR; // skip the line if it's a comment
+            continue; // skip the line if it's a comment
         
         NSRange r = [entry rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@" "] options:NSBackwardsSearch];
         newPath = [[filepath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[entry substringToIndex:r.location]];
@@ -538,9 +536,6 @@
                                 forKeys:[newEntry defaultKeys]]];
         
         [pendingFiles enqueue:newEntry];
-		break;
-	noSTR:
-		newEntry = nil;
     }
 }
 

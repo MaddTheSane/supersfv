@@ -21,7 +21,6 @@
 
 
 @implementation SPFileEntry
-@synthesize properties;
 @synthesize defaultKeys = keys;
 
 - (instancetype) init
@@ -30,7 +29,7 @@
         NSArray *values = @[[[NSImage alloc] init], @"/", @"", @""];
         keys   = @[@"status", @"filepath", @"expected", @"result"]; 
         
-        properties = [[NSMutableDictionary alloc] initWithObjects: values forKeys: keys];
+        _properties = [[NSDictionary alloc] initWithObjects: values forKeys: keys];
     }
     return self;
 }

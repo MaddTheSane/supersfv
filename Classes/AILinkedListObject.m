@@ -9,7 +9,6 @@
 #import "AILinkedListObject.h"
 
 @interface AILinkedListObject (PRIVATE)
-- (void)setLastObject:(AILinkedListObject *)theObject;
 @property (weak, readwrite) AILinkedListObject *lastObject;
 @end
 
@@ -29,14 +28,7 @@
 
 - (void)setNextObject:(AILinkedListObject *)theObject {
 	next = theObject;
-	[theObject setLastObject:self];
+	theObject.lastObject = self;
 }
 
-- (AILinkedListObject *)lastObject {
-	return last;
-}
-
-- (AILinkedListObject *)nextObject {
-	return next;
-}
 @end
