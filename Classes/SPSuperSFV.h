@@ -20,7 +20,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SPTableView.h"
 
-@interface SPSuperSFV : NSObject <NSToolbarDelegate>
+@interface SPSuperSFV : NSObject <NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
     IBOutlet NSButton *button_add;
     IBOutlet NSButton *button_closeLicense;
@@ -45,13 +45,14 @@
     IBOutlet NSView *view_checksum;
     IBOutlet NSWindow *window_about;
     IBOutlet NSWindow *window_main;
-    IBOutlet SPTableView *tableView_fileList;
 
     NSMutableArray *records;
     NSImageCell *cell;
     NSOperationQueue *queue;
     NSTimer *updateProgressTimer;
 }
+
+@property (weak) IBOutlet SPTableView *tableView_fileList;
 - (IBAction)aboutIconClicked:(id)sender;
 - (IBAction)addClicked:(id)sender;
 - (IBAction)closeLicense:(id)sender;
@@ -66,17 +67,10 @@
 - (void)parseSFVFile:(NSString *) filepath;
 - (void)processFiles:(NSArray *) filenames;
 - (void)removeSelectedRecords:(id) sender;
-- (void)didEndSaveSheet:(NSSavePanel *)savePanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)didEndOpenSheet:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (NSString *)_applicationVersion;
 
-- (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(int)row;
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView;
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op;
-- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)operation;
-- (void)tableView:(NSTableView *)tableView didClickTableColumn:(NSTableColumn *)tableColumn;
-- (void)sortWithDescriptor:(id)descriptor;
+- (void)sortWithDescriptor:(NSSortDescriptor*)descriptor;
 
 - (void)setup_toolbar;
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)flag;

@@ -21,28 +21,17 @@
 
 
 @implementation SPFileEntry
+@synthesize defaultKeys = keys;
 
-- (id)init
+- (instancetype)init
 {
-    if (self = [super init])
-    {
-        NSImage *img = [[NSImage alloc] init];
-        NSArray *values = [NSArray arrayWithObjects: img, @"/", @"", @"", nil];
-        keys   = [NSArray arrayWithObjects: @"status", @"filepath", @"expected", @"result", nil];
-
-        [img release];
-        properties = [[NSMutableDictionary alloc] initWithObjects: values forKeys: keys];
+    if (self = [super init]) {
+        NSArray *values = @[[[NSImage alloc] init], @"/", @"", @""];
+        keys   = @[@"status", @"filepath", @"expected", @"result"]; 
+        
+        _properties = [[NSDictionary alloc] initWithObjects: values forKeys: keys];
     }
     return self;
-}
-
-- (void)setProperties: (NSDictionary *)newProperties
-{
-    if (properties != newProperties)
-    {
-        [properties autorelease];
-        properties = [[NSMutableDictionary alloc] initWithDictionary: newProperties];
-    }
 }
 
 - (id)valueForUndefinedKey:(id)key
@@ -60,17 +49,6 @@
 	}
 
     return [[self properties] valueForKey:key];
-}
-
-
--(NSMutableDictionary*)properties
-{
-    return properties;
-}
-
-- (NSArray*) defaultKeys
-{
-    return keys;
 }
 
 @end

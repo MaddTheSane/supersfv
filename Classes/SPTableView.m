@@ -17,15 +17,18 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#import <Cocoa/Cocoa.h>
+#import "SPTableView.h"
+#import "SPSuperSFV.h"
 
+@implementation SPTableView
 
-@interface SPFileEntry : NSObject {
-    NSMutableDictionary * properties;
-    NSArray *keys;
+- (void)keyDown:(NSEvent *)theEvent
+{
+    switch ([theEvent keyCode])
+    {
+        case 51:  [[NSNotificationCenter defaultCenter] postNotificationName:@"RM_RECORD_FROM_LIST" object:nil]; break;
+        default:  [super keyDown:theEvent]; break;
+    }
 }
 
-- (NSMutableDictionary*)properties;
-- (void)setProperties: (NSDictionary *)newProperties;
-- (NSArray*)defaultKeys;
 @end

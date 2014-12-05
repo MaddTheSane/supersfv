@@ -32,7 +32,7 @@
 {
     if (self = [super init])
     {
-        fileEntry = [entry retain];
+        fileEntry = entry;
         target = object;
         cryptoAlgorithm = algorithm;
     }
@@ -40,15 +40,9 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [fileEntry release];
-    [super dealloc];
-}
-
 -(void)main
 {
-	NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
 
     NSLog(@"Running for file %@", [[fileEntry properties] objectForKey:@"filepath"]);
 
@@ -90,7 +84,7 @@
 		NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:file];
 		
         if (fileHandle == NULL)
-            goto cancelled;
+            return;
         
 //        [target performSelectorOnMainThread:@selector(initProgress:)
 //                               withObject:[NSArray arrayWithObjects:
@@ -131,12 +125,12 @@
                     break;
             }
         }
-		[fileHandle release];
+		fileHandle = nil;
 		NSLog(@"Finished with file %@", [[fileEntry properties] objectForKey:@"filepath"]);
         
 
         if ([self isCancelled])
-            goto cancelled;
+            return;
         
         if (!algorithm) {
             hash = [[NSString stringWithFormat:@"%08x", crc] uppercaseString];
@@ -180,8 +174,7 @@
          */
 
     }
-cancelled:
-	[autoReleasePool release];
+	}
 }
 
 @end

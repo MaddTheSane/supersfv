@@ -17,16 +17,13 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#import "SPTableView.h"
+#import <Cocoa/Cocoa.h>
 
-@implementation SPTableView
-- (void)keyDown:(NSEvent *)theEvent
-{
-    switch ([theEvent keyCode])
-    {
-        /* Backspace */
-        case 51:  [[NSNotificationCenter defaultCenter] postNotificationName:@"RM_RECORD_FROM_LIST" object:nil]; break;
-        default:  [super keyDown:theEvent]; break;
-    }
-}
+
+@interface SPFileEntry : NSObject
+@property (copy) NSDictionary *properties;
+@property (readonly, strong) NSArray *defaultKeys;
+
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
 @end
