@@ -9,16 +9,13 @@
 #import <Foundation/Foundation.h>
 
 /* For use by AILinkedList, you probably don't need this. */
-@interface AILinkedListObject : NSObject {
-	id object;
-	AILinkedListObject *last, *next;
-}
-- (AILinkedListObject *)initWithObject:(id)theObject;
+@interface AILinkedListObject : NSObject
+- (instancetype)initWithObject:(id)theObject;
 
-- (id)object;
+@property (strong, readonly) id object;
 
 - (void)setNextObject:(AILinkedListObject *)theObject;
 
-- (AILinkedListObject *)lastObject;
-- (AILinkedListObject *)nextObject;
+@property (assign, readonly) AILinkedListObject *lastObject;
+@property (assign, nonatomic) AILinkedListObject *nextObject;
 @end

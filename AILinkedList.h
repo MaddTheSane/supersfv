@@ -12,7 +12,6 @@
 
 @interface AILinkedList : NSObject {
 	AILinkedListObject *front, *back;
-	unsigned count;
 }
 /* Returns the object */
 - (id)objectAtIndex:(unsigned)index; /* O(N) */
@@ -20,15 +19,15 @@
 - (id)objectAtEnd; /* O(1) */
 
 
-- (unsigned)count; /* O(1) */
+@property (readonly) NSUInteger count; /* O(1) */
 - (void)dump;
 
-- (void)insertObject:(id)object atIndex:(unsigned)index; /* O(N) */
+- (void)insertObject:(id)object atIndex:(NSUInteger)index; /* O(N) */
 - (void)insertObjectAtFront:(id)object; /* O(1) */
 - (void)insertObjectAtEnd:(id)object; /* O(1) */
 
 /* Returns the object removed */
-- (id)removeObjectAtIndex:(unsigned)index; /* O(N) */
+- (id)removeObjectAtIndex:(NSUInteger)index; /* O(N) */
 - (id)removeObjectAtFront; /* O(1) */
 - (id)removeObjectAtEnd; /* O(1) */
 @end

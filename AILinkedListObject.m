@@ -10,9 +10,14 @@
 
 @interface AILinkedListObject (PRIVATE)
 - (void)setLastObject:(AILinkedListObject *)theObject;
+@property (weak, readwrite) AILinkedListObject *lastObject;
 @end
 
 @implementation AILinkedListObject
+@synthesize lastObject = last;
+@synthesize nextObject = next;
+@synthesize object;
+
 - (AILinkedListObject *)initWithObject:(id)theObject {
 	if ((self = [super init])) {
 		object = [theObject retain];
@@ -27,17 +32,9 @@
 	[super dealloc];
 }
 
-- (id)object {
-	return object;
-}
-
 - (void)setNextObject:(AILinkedListObject *)theObject {
 	next = theObject;
 	[theObject setLastObject:self];
-}
-
-- (void)setLastObject:(AILinkedListObject *)theObject {
-	last = theObject;
 }
 
 - (AILinkedListObject *)lastObject {

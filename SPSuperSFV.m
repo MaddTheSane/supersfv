@@ -60,7 +60,7 @@
     [cell release];
     cell = [[NSImageCell alloc] initImageCell:nil];
     
-    // selecting items in our table view and pressing the delete key
+    // selecting items our table view and pressing the delete key
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(removeSelectedRecords:) 
                                                  name:@"RM_RECORD_FROM_LIST" 
@@ -84,6 +84,24 @@
     // we're not document based, so we'll quit when the last window is closed
     return YES;
 }
+
+/*- (NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication *) sender
+{
+        if ([records count] > 0) {
+            NSBeginAlertSheet(@"Confirm Quit", @"Quit", @"Cancel", nil, window_main, self,
+                              @selector(quitSheetDidEnd:returnCode:contextInfo:),
+                              nil, nil, @"You seem to still have some unfinished business here bud, sure you want to quit?");
+            return NSTerminateLater;
+        }
+    return NSTerminateNow;
+}
+
+- (void) quitSheetDidEnd: (NSWindow *) sheet returnCode: (int) returnCode
+             contextInfo: (void *) contextInfo
+{
+    [NSApp stopModal];
+    [NSApp replyToApplicationShouldTerminate: returnCode == NSAlertDefaultReturn];
+}*/
 
 - (void) applicationWillTerminate: (NSNotification *) notification
 {
@@ -121,8 +139,8 @@
 	[t addObjectsFromArray:records];
 	[records removeAllObjects];
     int i;
-    for (i = 0; i < [t count]; i++)
-        [self processFiles:[NSArray arrayWithObject:[[[t objectAtIndex:i] properties] objectForKey:@"filepath"]]];
+    for (id i in t)
+        [self processFiles:[NSArray arrayWithObject:[[i properties] objectForKey:@"filepath"]]];
 	[self updateUI];
 	[t release];
 }
@@ -196,7 +214,7 @@
 - (IBAction)showLicense:(id)sender
 {
     NSString *licensePath = [[NSBundle mainBundle] pathForResource:@"License" ofType:@"txt"];
-    [textView_license setString:[NSString stringWithContentsOfFile:licensePath usedEncoding:NULL error:NULL]];
+    [textView_license setString:[NSString stringWithContentsOfFile:licensePath]];
     
     [NSApp beginSheet:panel_license
        modalForWindow:window_about
@@ -249,6 +267,7 @@
 // this probably needs to be rewritten to be more efficient, and clean
 - (void)addFiles:(NSTimer *)timer
 {
+	NSAutoreleasePool *autoreleasePool = [[NSAutoreleasePool alloc] init];
 	SPFileEntry *content;
     int do_endProgress = 0; // we use this to make sure we only call endProgress when needed
     
@@ -266,7 +285,7 @@
                  *result;
         
         NSFileManager *dm = [NSFileManager defaultManager];
-        NSDictionary *fileAttributes = [dm attributesOfItemAtPath:file error:NULL];
+        NSDictionary *fileAttributes = [dm fileAttributesAtPath:file traverseLink:NO];
         
 
         algorithm = (![hash isEqualToString:@""]) ? ([hash length] == 8) ? 0 : ([hash length] == 32) ? 1 : ([hash length] == 40) ? 2 : 0 : [popUpButton_checksum indexOfSelectedItem];
@@ -276,15 +295,12 @@
         if (inFile == NULL)
             break;
         
-        [self performSelectorOnMainThread:@selector(initProgress:)
-                               withObject:[NSArray arrayWithObjects:
-                                           [NSString stringWithFormat:@"Performing %@ on %@", [popUpButton_checksum itemTitleAtIndex:algorithm],
-                                            [file lastPathComponent]],
-                                           [NSNumber numberWithDouble:0.0], 
-                                           [fileAttributes objectForKey:NSFileSize],
-                                           nil]
-                            waitUntilDone:YES];
-
+        [self performSelectorOnMainThread:@selector(initProgress:) withObject:[NSArray arrayWithObjects:
+            [NSString stringWithFormat:@"Performing %@ on %@", [popUpButton_checksum itemTitleAtIndex:algorithm],
+                [file lastPathComponent]],
+            [NSNumber numberWithDouble:0.0], 
+            [fileAttributes objectForKey:NSFileSize], nil] waitUntilDone:YES];
+        
         do_endProgress++; // don't care about doing endProgress unless the progress has been init-ed
         
         crc32_t crc;
@@ -314,20 +330,17 @@
                     SHA1_Update(&sha_ctx, data, bytes);
                     break;
             }
-
-            [self performSelectorOnMainThread:@selector(updateProgress:)
-                                   withObject:[NSArray arrayWithObjects:
-                                               [NSNumber numberWithDouble:(double)bytes], @"", nil]
-                                waitUntilDone:NO];
+            [self performSelectorOnMainThread:@selector(updateProgress:) withObject:[NSArray arrayWithObjects:
+                [NSNumber numberWithDouble:[progressBar_progress doubleValue]+(double)bytes], @"", nil] waitUntilDone:YES];                
         }
-
+        
         fclose(inFile);
         
         if (!continueProcessing)
             break;
 
         if (!algorithm) {
-                result = [[NSString stringWithFormat:@"%08x", crc] uppercaseString];
+                result = [[NSString stringWithFormat:@"%08lx", crc] uppercaseString];
         } else {
             result = @"";
                 dgst = (u8 *) calloc (((algorithm == 1)?32:40), sizeof(u8));
@@ -345,25 +358,19 @@
         }
         
         SPFileEntry *newEntry = [[SPFileEntry alloc] init];
-        NSDictionary *newDict;
         
         if (![hash isEqualToString:@""])
-            newDict = [[NSMutableDictionary alloc] 
+            [newEntry setProperties:[[NSMutableDictionary alloc] 
                         initWithObjects:[NSArray arrayWithObjects:[[hash uppercaseString] isEqualToString:result]?[NSImage imageNamed:@"button_ok"]:[NSImage imageNamed:@"button_cancel"],
                             file, [hash uppercaseString], result, nil] 
-                                forKeys:[newEntry defaultKeys]];
+                                forKeys:[newEntry defaultKeys]]];
         else
-            newDict = [[NSMutableDictionary alloc] 
+            [newEntry setProperties:[[NSMutableDictionary alloc] 
                         initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed:@"button_ok"],
                             file, result, result, nil]
-                                forKeys:[newEntry defaultKeys]];
-        
-        [newEntry setProperties:newDict];
-        [newDict release];
+                                forKeys:[newEntry defaultKeys]]];
         
         [records addObject:newEntry];
-        [newEntry release];
-
         [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:YES];
 	}
     // 4 times I had to add this LAME! C'mon Apple, get yer thread on!
@@ -377,8 +384,7 @@
         [self performSelectorOnMainThread:@selector(endProgress) withObject:nil waitUntilDone:YES];
     }
     
-    [autoreleasePool release];
-    autoreleasePool = [[NSAutoreleasePool alloc] init];
+    [autoreleasePool drain];
 }
 
 // adds files to the tableview, which means it also starts hashing them and all the other fun stuff
@@ -386,7 +392,7 @@
 {
 	NSTimer *fileAddingTimer;
 	
-	autoreleasePool = [[NSAutoreleasePool alloc] init];
+	NSAutoreleasePool *autoreleasePool = [[NSAutoreleasePool alloc] init];
 	fileAddingTimer = [[NSTimer scheduledTimerWithTimeInterval:0.5
                                                            target:self
                                                          selector:@selector(addFiles:)
@@ -396,7 +402,7 @@
 	CFRunLoopRun();
 	
 	[fileAddingTimer invalidate]; [fileAddingTimer release];
-	[autoreleasePool release];
+	[autoreleasePool drain];
 }
 
 // remove selected records from our table view
@@ -457,11 +463,9 @@
 {
     BOOL isDir;
     NSFileManager *dm = [NSFileManager defaultManager];
-    
-    NSEnumerator *e = [filenames objectEnumerator];
-    NSString *file;
-    
-    while (file = [e nextObject]) {
+        
+    for (NSString *file in filenames) {
+        SPFileEntry *newEntry = [[SPFileEntry alloc] init];
         if ([[[file lastPathComponent] substringWithRange:NSMakeRange(0, 1)] isEqualToString:@"."])
             continue;  // ignore hidden files
         if ([[[file pathExtension] lowercaseString] isEqualToString:@"sfv"]) {
@@ -472,101 +476,86 @@
         } else {
             // recurse directories (I didn't feel like using NSDirectoryEnumerator)
             if ([dm fileExistsAtPath:file isDirectory:&isDir] && isDir) {
-                NSArray *dirContents = [dm contentsOfDirectoryAtPath:file error:NULL];
+				NSError *err = nil;
+                NSArray *dirContents = [dm contentsOfDirectoryAtPath:file error:&err];
                 int i;
                 for (i = 0; i < [dirContents count]; i++) {
                     [self processFiles:[NSArray arrayWithObject:[file stringByAppendingPathComponent:[dirContents objectAtIndex:i]]]];
                 }
                 continue;
             }
-
-            SPFileEntry *newEntry = [[SPFileEntry alloc] init];
-            NSDictionary *newDict = [[NSMutableDictionary alloc] 
+            [newEntry setProperties:[[NSMutableDictionary alloc] 
                         initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"button_cancel.png"], file, @"", @"", nil] 
-                                forKeys:[newEntry defaultKeys]];
+                                forKeys:[newEntry defaultKeys]]];
             
-            [newEntry setProperties:newDict];
-            [newDict release];
-
             [pendingFiles enqueue:newEntry];
-            [newEntry release];
         }
     }
 }
 
 - (void)parseSFVFile:(NSString *) filepath
 {
-    NSArray *contents = [[NSString stringWithContentsOfFile:filepath usedEncoding:NULL error:NULL] componentsSeparatedByString:@"\n"];
+    NSArray *contents = [[NSString stringWithContentsOfFile:filepath] componentsSeparatedByString:@"\n"];
     NSString *entry;
     NSEnumerator *e = [contents objectEnumerator];
     
     while (entry = [e nextObject]) {
         int errc = 0; // error count
-        NSString *newPath;
-        NSString *hash;
+        NSString *newPath = nil;
+        NSString *hash = nil;
+        SPFileEntry *newEntry = [[SPFileEntry alloc] init];
         
         entry = [entry stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if ([entry isEqualToString:@""])
-            continue;
+            goto noSTR;
         if ([[entry substringWithRange:NSMakeRange(0, 1)] isEqualToString:@";"])
-            continue; // skip the line if it's a comment
+            goto noSTR; // skip the line if it's a comment
         
         NSRange r = [entry rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@" "] options:NSBackwardsSearch];
         newPath = [[filepath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[entry substringToIndex:r.location]];
         hash = [entry substringFromIndex:(r.location+1)]; // +1 so we don't capture the space
-
-        SPFileEntry *newEntry = [[SPFileEntry alloc] init];
-        NSDictionary *newDict;
-        
+         
         // file doesn't exist...
         if (![[NSFileManager defaultManager] fileExistsAtPath:newPath]) {
-            newDict = [[NSMutableDictionary alloc] 
+            [newEntry setProperties:[[NSMutableDictionary alloc] 
                         initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"error.png"], newPath, hash, @"Missing", nil] 
-                                forKeys:[newEntry defaultKeys]];
-            [newEntry setProperties:newDict];
-            [newDict release];
+                                forKeys:[newEntry defaultKeys]]];
             errc++;
         }
         
         // length doesn't match CRC32, MD5 or SHA-1 respectively
         if ([hash length] != 8 && [hash length] != 32 && [hash length] != 40) {
-            newDict = [[NSMutableDictionary alloc] 
+            [newEntry setProperties:[[NSMutableDictionary alloc] 
                         initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"error.png"],newPath, 
                                             @"Unknown (not recognized)",[[newEntry properties] objectForKey:@"result"], nil] 
-                                forKeys:[newEntry defaultKeys]];
-
-            [newEntry setProperties:newDict];
-            [newDict release];
+                                forKeys:[newEntry defaultKeys]]];
             errc++;
         }
-
+        
         // if theres an error, then we don't need to continue with this entry
         if (errc) {
             [records addObject:newEntry];
-            [newEntry release];
             [self updateUI];
             continue;
         }
         // assume it'll fail until proven otherwise
-        newDict = [[NSMutableDictionary alloc] 
-                        initWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"button_cancel.png"], newPath, hash, @"", nil] 
-                                forKeys:[newEntry defaultKeys]];
+        [newEntry setProperties:[NSMutableDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSImage imageNamed: @"button_cancel.png"], newPath, hash, @"", nil] 
+                                forKeys:[newEntry defaultKeys]]];
         
-        [newEntry setProperties:newDict];
-        [newDict release];
         [pendingFiles enqueue:newEntry];
-        [newEntry release];
+		break;
+	noSTR:
+		[newEntry release];
     }
 }
 
 // expects an NSArray containing:
-// (NSNumber *)progressDelta, (NSString *)description
+// (NSNumber *)currentProgress, (NSString *)description
 - (void)updateProgress:(NSArray *)args
 {
     if (![[args objectAtIndex:1] isEqualToString:@""])
         [textField_status setStringValue:[args objectAtIndex:1]];
-
-    [progressBar_progress incrementBy:[[args objectAtIndex:0] doubleValue]];
+    [progressBar_progress setDoubleValue:[[args objectAtIndex:0] doubleValue]];
 }
 
 // expects an NSArray containing:
@@ -611,7 +600,7 @@
 }
 
 #pragma mark TableView
-- (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(int)row
+- (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row
 {
     NSString *key = [column identifier];
     SPFileEntry *newEntry = [records objectAtIndex:row];
@@ -620,19 +609,19 @@
     return [[newEntry properties] objectForKey:key];
 }
 
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
     return [records count];
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info 
-                 proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op 
+                 proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op 
 {    
     return NSDragOperationEvery;    
 }
 
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id <NSDraggingInfo>)info 
-              row:(int)row dropOperation:(NSTableViewDropOperation)operation
+              row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
 {
     NSPasteboard* pboard = [info draggingPasteboard];
     NSArray *files = [pboard propertyListForType:NSFilenamesPboardType];
@@ -677,7 +666,7 @@
 #pragma mark Toolbar
 - (void)setup_toolbar
 {
-    NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier: SuperSFVToolbarIdentifier] autorelease];
+    NSToolbar *toolbar = [[NSToolbar alloc] initWithIdentifier: SuperSFVToolbarIdentifier];
     
     [toolbar setAllowsUserCustomization: YES];
     [toolbar setAutosavesConfiguration: YES];
@@ -685,6 +674,7 @@
     
     [toolbar setDelegate: self];
     [window_main setToolbar: toolbar];
+	[toolbar release];
 }
 
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)flag 

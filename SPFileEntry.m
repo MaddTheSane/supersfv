@@ -25,11 +25,9 @@
 - (id) init
 {
     if (self = [super init]) {
-        NSImage *img = [[NSImage alloc] init];
-        NSArray *values = [NSArray arrayWithObjects: img, @"/", @"", @"", nil];
+        NSArray *values = [NSArray arrayWithObjects: [[NSImage alloc] init], @"/", @"", @"", nil];
         keys   = [NSArray arrayWithObjects: @"status", @"filepath", @"expected", @"result", nil]; 
         
-        [img release];
         properties = [[NSMutableDictionary alloc] initWithObjects: values forKeys: keys];
     }
     return self;
@@ -39,7 +37,7 @@
 {
     if (properties != newProperties)
     {
-        [properties autorelease];
+        [properties release];
         properties = [[NSMutableDictionary alloc] initWithDictionary: newProperties];
     }    
 }

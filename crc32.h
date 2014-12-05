@@ -1,8 +1,6 @@
 #ifndef __CRC32_H__
 #define __CRC32_H__
 
-#include <stdint.h>
-
 #ifndef _ANSI_ARGS_
 #ifdef PROTOTYPES
 #define _ANSI_ARGS_(c)	c
@@ -15,7 +13,7 @@
 extern "C" {
 #endif
 
-typedef uint32_t crc32_t;
+typedef unsigned long crc32_t;
 #define Z_NULL  0
 
 #define crc32 uulib_crc32

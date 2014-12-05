@@ -20,11 +20,15 @@
 #import "SPTableView.h"
 
 @implementation SPTableView
+- (NSArray *)getSelectedPaths
+{
+	return [[self dataSource] getSelectedPaths];
+}
+
 - (void)keyDown:(NSEvent *)theEvent
 {
     switch ([theEvent keyCode])
     {
-        /* Backspace */
         case 51:  [[NSNotificationCenter defaultCenter] postNotificationName:@"RM_RECORD_FROM_LIST" object:nil]; break;
         default:  [super keyDown:theEvent]; break;
     }

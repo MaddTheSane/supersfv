@@ -10,10 +10,12 @@
 #import "AILinkedListObject.h"
 
 @interface AILinkedList (PRIVATE)
-- (id)linkedListObjectAtIndex:(unsigned)index;
+- (id)linkedListObjectAtIndex:(NSUInteger)index;
 @end
 
 @implementation AILinkedList
+@synthesize count;
+
 - (id)init {
 	if ((self = [super init])) {
 		front = nil;
@@ -45,7 +47,7 @@
     }
 }
 
-- (id)linkedListObjectAtIndex:(unsigned)index {
+- (id)linkedListObjectAtIndex:(NSUInteger)index {
 	AILinkedListObject *current;
 	
 	@synchronized(self) {
@@ -95,18 +97,18 @@
 	return theObject;
 }
 
-- (unsigned)count {
-	unsigned theCount;
+- (NSUInteger)count {
+	NSUInteger theCount;
 	@synchronized(self) {
 		theCount = count;
 	}
 	return theCount;
 }
 
-- (void)insertObject:(id)object atIndex:(unsigned)index {
+- (void)insertObject:(id)object atIndex:(NSUInteger)index {
 	@synchronized(self) {
 		if (index > count)
-			[NSException raise:NSRangeException format:@"The index %d is out of range.", index];
+			[NSException raise:NSRangeException format:@"The index %lu is out of range.", (unsigned long)index];
 		
 		AILinkedListObject *newObject = [[AILinkedListObject alloc] initWithObject:object];
 		AILinkedListObject *last, *next, *tmp;
@@ -149,7 +151,7 @@
 	}
 }
 
-- (id)removeObjectAtIndex:(unsigned)index {
+- (id)removeObjectAtIndex:(NSUInteger)index {
 	id goneID;
 	@synchronized(self) {
 		AILinkedListObject *goneObject = [self linkedListObjectAtIndex:index];

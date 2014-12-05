@@ -53,7 +53,7 @@ typedef unsigned char u8;
     NSMutableArray *records;
     NSImageCell *cell;
     AIQueue *pendingFiles;
-    NSAutoreleasePool *autoreleasePool;
+    //NSAutoreleasePool *autoreleasePool;
     BOOL continueProcessing;
 }
 - (IBAction)aboutIconClicked:(id)sender;
@@ -81,10 +81,10 @@ typedef unsigned char u8;
 - (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (NSString *)_applicationVersion;
 
-- (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(int)row;
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView;
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op;
-- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)operation;
+- (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row;
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView;
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op;
+- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation;
 - (void)tableView:(NSTableView *)tableView didClickTableColumn:(NSTableColumn *)tableColumn;
 - (void)sortWithDescriptor:(id)descriptor;
 
