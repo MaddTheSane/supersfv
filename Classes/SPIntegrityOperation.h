@@ -17,18 +17,31 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#import "SPTableView.h"
-#import "SPSuperSFV.h"
+#import <Cocoa/Cocoa.h>
 
-@implementation SPTableView
+@class FileEntry;
 
-- (void)keyDown:(NSEvent *)theEvent
-{
-    switch ([theEvent keyCode])
-    {
-        case 51:  [[NSNotificationCenter defaultCenter] postNotificationName:@"RM_RECORD_FROM_LIST" object:nil]; break;
-        default:  [super keyDown:theEvent]; break;
-    }
+#include <openssl/md5.h>
+#include <openssl/sha.h>
+#include "crc32.h"
+
+typedef NS_ENUM(int, SPCryptoAlgorithm) {
+	SPCryptoAlgorithmUnknown = -1,
+	SPCryptoAlgorithmCRC = 0,
+	SPCryptoAlgorithmMD5,
+	SPCryptoAlgorithmSHA1
+};
+
+@interface SPIntegrityOperation : NSOperation {
+@private
+	FileEntry *fileEntry;
+    NSObject *target;
+    SPCryptoAlgorithm cryptoAlgorithm;
+    NSString *hash;
 }
 
+@property (readonly) NSString *hashString;
+
+- (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object;
+- (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
 @end

@@ -1,17 +1,17 @@
 /*
- SuperSFV is the legal property of its developers, whose names are 
+ SuperSFV is the legal property of its developers, whose names are
  listed in the copyright file included with this source distribution.
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -19,11 +19,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "SPTableView.h"
-@class Queue;
 
-typedef unsigned char u8;
-
-@interface SPSuperSFV : NSObject <NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate>
+@interface SPSuperSFV : NSObject <NSApplicationDelegate, NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
     IBOutlet NSButton *button_add;
     IBOutlet NSButton *button_closeLicense;
@@ -48,11 +45,11 @@ typedef unsigned char u8;
     IBOutlet NSView *view_checksum;
     IBOutlet NSWindow *window_about;
     IBOutlet NSWindow *window_main;
-    
+
     NSMutableArray *records;
     NSImageCell *cell;
-    Queue *pendingFiles;
-    BOOL continueProcessing;
+    NSOperationQueue *queue;
+    NSTimer *updateProgressTimer;
 }
 
 @property (weak) IBOutlet SPTableView *tableView_fileList;
@@ -67,19 +64,11 @@ typedef unsigned char u8;
 - (IBAction)showLicense:(id)sender;
 - (IBAction)stopClicked:(id)sender;
 
-- (void)updateUI;
-- (void)initProgress:(NSArray *)args;
-- (void)updateProgress:(NSArray *)args;
-- (void)endProgress;
 - (void)parseSFVFile:(NSString *) filepath;
 - (void)processFiles:(NSArray *) filenames;
 - (void)removeSelectedRecords:(id) sender;
-- (void)fileAddingThread;
-- (void)addFiles:(NSTimer *)timer;
-- (void)didEndSaveSheet:(NSSavePanel *)savePanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)didEndOpenSheet:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-@property (readonly, copy) NSString *_applicationVersion;
+- (NSString *)_applicationVersion;
 
 - (void)sortWithDescriptor:(NSSortDescriptor*)descriptor;
 
