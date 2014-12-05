@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4E1480A40ABA5F9800F6E3B7 /* List manager.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4E1480A00ABA5F9800F6E3B7 /* List manager.icns */; };
-		4E1480A50ABA5F9800F6E3B7 /* schedule.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4E1480A10ABA5F9800F6E3B7 /* schedule.icns */; };
 		4E283F5F0AB657F9007B4BFC /* SuperSFVHelp in Resources */ = {isa = PBXBuildFile; fileRef = 4E283F5C0AB657F9007B4BFC /* SuperSFVHelp */; };
 		4E4AC9580AB7E6130046762E /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E4AC9560AB7E6130046762E /* License.txt */; };
 		4E515BDF0AB4E1DF00B2BE93 /* AIQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E515BDA0AB4E1DF00B2BE93 /* AIQueue.m */; };
@@ -34,8 +32,6 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		32CA4F630368D1EE00C91783 /* SuperSFV_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SuperSFV_Prefix.pch; sourceTree = "<group>"; };
-		4E1480A00ABA5F9800F6E3B7 /* List manager.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "List manager.icns"; sourceTree = "<group>"; };
-		4E1480A10ABA5F9800F6E3B7 /* schedule.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = schedule.icns; sourceTree = "<group>"; };
 		4E283F5C0AB657F9007B4BFC /* SuperSFVHelp */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SuperSFVHelp; sourceTree = "<group>"; };
 		4E4AC9560AB7E6130046762E /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = SOURCE_ROOT; };
 		4E515BD90AB4E1DE00B2BE93 /* AIQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIQueue.h; sourceTree = "<group>"; };
@@ -170,8 +166,6 @@
 		4E707D690AB0BFE500138F41 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				4E1480A00ABA5F9800F6E3B7 /* List manager.icns */,
-				4E1480A10ABA5F9800F6E3B7 /* schedule.icns */,
 			);
 			path = Images;
 			sourceTree = "<group>";
@@ -237,8 +231,6 @@
 				5542CD191A3174A70081E21E /* Credits.rtf in Resources */,
 				5542CD121A3173350081E21E /* Images.xcassets in Resources */,
 				4E4AC9580AB7E6130046762E /* License.txt in Resources */,
-				4E1480A40ABA5F9800F6E3B7 /* List manager.icns in Resources */,
-				4E1480A50ABA5F9800F6E3B7 /* schedule.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,6 +286,7 @@
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "List manager";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -310,6 +303,7 @@
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "List manager";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_MODEL_TUNING = G5;
