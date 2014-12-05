@@ -76,8 +76,6 @@ typedef unsigned char u8;
 - (void)removeSelectedRecords:(id) sender;
 - (void)fileAddingThread;
 - (void)addFiles:(NSTimer *)timer;
-- (void)didEndSaveSheet:(NSSavePanel *)savePanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-- (void)didEndOpenSheet:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 @property (readonly, copy) NSString *_applicationVersion;
 

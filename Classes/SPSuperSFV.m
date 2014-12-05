@@ -127,18 +127,16 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
     [oPanel setAllowsMultipleSelection:YES];
     [oPanel setCanChooseFiles:YES];
     [oPanel setCanChooseDirectories:YES];
-    [oPanel beginSheetForDirectory:NSHomeDirectory()
-                              file:nil
-                    modalForWindow:window_main
-                     modalDelegate:self
-                    didEndSelector:@selector(didEndOpenSheet:returnCode:contextInfo:)
-                       contextInfo:NULL];
-}
-
-- (void)didEndOpenSheet:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-    if (returnCode == NSOKButton)
-        [self processFiles:[openPanel filenames]];
+    [oPanel beginSheetModalForWindow:window_main completionHandler:^(NSInteger result) {
+        if (result == NSOKButton) {
+            NSArray *URLs = [oPanel URLs];
+            NSMutableArray *paths = [[NSMutableArray alloc] initWithCapacity:[URLs count]];
+            for (NSURL *url in URLs) {
+                [paths addObject:[url path]];
+            }
+            [self processFiles:paths];
+        }
+    }];
 }
 
 // Hmm... Is this OK?
@@ -178,38 +176,28 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     [sPanel setPrompt:@"Save"];
     [sPanel setTitle:@"Save"];
-    [sPanel setRequiredFileType:@"sfv"];
+    sPanel.allowedFileTypes = @[@"sfv"];
     
-    [sPanel beginSheetForDirectory:NSHomeDirectory()
-                              file:nil
-                    modalForWindow:window_main
-                     modalDelegate:self
-                    didEndSelector:@selector(didEndSaveSheet:returnCode:contextInfo:)
-                       contextInfo:NULL];
-}
-
-- (void)didEndSaveSheet:(NSSavePanel *)savePanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-    if (returnCode == NSOKButton) {
-        if ([records count]) {
-            // shameless plug to start out with
-            NSString *output = [NSString stringWithFormat:@"; Created using SuperSFV v%@ on Mac OS X", [self _applicationVersion]];
-            
-            NSEnumerator *e = [records objectEnumerator];
-            SPFileEntry *entry;
-            while (entry = [e nextObject]) {
-                if ((![[entry properties][@"result"] isEqualToString:@"Missing"])
-                    && (![[entry properties][@"result"] isEqualToString:@""])) {
-
-                    output = [output stringByAppendingFormat:@"\n%@ %@", 
-                                [[entry properties][@"filepath"] lastPathComponent],
-                                [entry properties][@"result"]];
+    [sPanel beginSheetModalForWindow:window_main completionHandler:^(NSInteger result) {
+        if (result == NSOKButton) {
+            if ([records count]) {
+                // shameless plug to start out with
+                NSString *output = [NSString stringWithFormat:@"; Created using SuperSFV v%@ on Mac OS X", [self _applicationVersion]];
+                
+                for (SPFileEntry *entry in records) {
+                    if ((![[entry properties][@"result"] isEqualToString:@"Missing"])
+                        && (![[entry properties][@"result"] isEqualToString:@""])) {
+                        
+                        output = [output stringByAppendingFormat:@"\n%@ %@",
+                                  [[entry properties][@"filepath"] lastPathComponent],
+                                  [entry properties][@"result"]];
+                    }
                 }
+                
+                [output writeToURL:[sPanel URL] atomically:NO encoding:NSUTF8StringEncoding error:NULL];
             }
-            
-            [output writeToFile:[savePanel filename] atomically:NO encoding:NSUTF8StringEncoding error:NULL];
         }
-    }
+    }];
 }
 
 - (IBAction)stopClicked:(id)sender
@@ -296,7 +284,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
 
         algorithm = (![hash isEqualToString:@""]) ? ([hash length] == 8) ? 0 : ([hash length] == 32) ? 1 : ([hash length] == 40) ? 2 : 0 : [popUpButton_checksum indexOfSelectedItem];
        
-        FILE *inFile = fopen([file cStringUsingEncoding:NSUTF8StringEncoding], "rb");
+        FILE *inFile = fopen([file fileSystemRepresentation], "rb");
         
         if (inFile == NULL)
             break;
