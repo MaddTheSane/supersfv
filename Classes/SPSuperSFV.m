@@ -126,7 +126,7 @@
                        contextInfo:NULL];
 }
 
-- (void)didEndOpenSheet:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo
+- (void)didEndOpenSheet:(NSOpenPanel *)openPanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if (returnCode == NSOKButton)
         [self processFiles:[openPanel filenames]];
@@ -153,14 +153,13 @@
         [self removeSelectedRecords:nil];
 }
 
-- (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
+- (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if (returnCode == NSOKButton) {
         [records removeAllObjects];
         [self updateUI];
     }
 }
-    
 
 - (IBAction)saveClicked:(id)sender
 {
@@ -180,7 +179,7 @@
                        contextInfo:NULL];
 }
 
-- (void)didEndSaveSheet:(NSSavePanel *)savePanel returnCode:(int)returnCode contextInfo:(void *)contextInfo
+- (void)didEndSaveSheet:(NSSavePanel *)savePanel returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if (returnCode == NSOKButton) {
         if ([records count]) {
@@ -336,7 +335,7 @@
             break;
 
         if (!algorithm) {
-                result = [[NSString stringWithFormat:@"%08lx", crc] uppercaseString];
+                result = [[NSString stringWithFormat:@"%08x", crc] uppercaseString];
         } else {
             result = @"";
                 dgst = (u8 *) calloc (((algorithm == 1)?32:40), sizeof(u8));

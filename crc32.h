@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-typedef unsigned long crc32_t;
+typedef unsigned int crc32_t;
 #define Z_NULL  0
 
 #define crc32 uulib_crc32
