@@ -32,6 +32,15 @@
 #define StopToolbarIdentifier        @"Stop Toolbar Identifier"
 #define SaveToolbarIdentifier        @"Save Toolbar Identifier"
 
+static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
+{
+    if ([NSThread isMainThread]) {
+        theBlock();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), theBlock);
+    }
+}
+
 @implementation SPSuperSFV
 @synthesize tableView_fileList;
 
@@ -292,10 +301,22 @@
         if (inFile == NULL)
             break;
         
-        [self performSelectorOnMainThread:@selector(initProgress:) withObject:@[[NSString stringWithFormat:@"Performing %@ on %@", [popUpButton_checksum itemTitleAtIndex:algorithm],
-                [file lastPathComponent]],
-            @0.0, 
-            fileAttributes[NSFileSize]] waitUntilDone:YES];
+            RunOnMainThreadSync(^{
+                textField_status.stringValue = [NSString stringWithFormat:@"Performing %@ on %@", [popUpButton_checksum itemTitleAtIndex:algorithm],
+                                                [file lastPathComponent]];
+                progressBar_progress.minValue = 0;
+                progressBar_progress.maxValue = [fileAttributes[NSFileSize] unsignedLongLongValue];
+                [progressBar_progress setDoubleValue:0.0];
+                
+                if (progressBar_progress.isHidden)
+                    progressBar_progress.hidden = NO;
+                
+                if (textField_status.isHidden)
+                    textField_status.hidden = NO;
+                
+                if (!button_stop.isEnabled)
+                    button_stop.enabled = YES;
+            });
         
         do_endProgress++; // don't care about doing endProgress unless the progress has been init-ed
         
@@ -326,7 +347,9 @@
                     SHA1_Update(&sha_ctx, data, bytes);
                     break;
             }
-            [self performSelectorOnMainThread:@selector(updateProgress:) withObject:@[@([progressBar_progress doubleValue]+(double)bytes), @""] waitUntilDone:YES];                
+            RunOnMainThreadSync(^{
+                [self updateProgress:@[@([progressBar_progress doubleValue]+(double)bytes), @""]];
+            });
         }
         
         fclose(inFile);
@@ -366,17 +389,23 @@
                                 forKeys:[newEntry defaultKeys]]];
         
         [records addObject:newEntry];
-        [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:YES];
+            RunOnMainThreadSync(^{
+                [self updateUI];
+            });
 		}
     // 4 times I had to add this LAME! C'mon Apple, get yer thread on!
     if (!continueProcessing) {
         [pendingFiles dump];
-        [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:YES];
+        RunOnMainThreadSync(^{
+            [self updateUI];
+        });
         continueProcessing = YES;
     }
     
     if (do_endProgress) {
-        [self performSelectorOnMainThread:@selector(endProgress) withObject:nil waitUntilDone:YES];
+        RunOnMainThreadSync(^{
+            [self endProgress];
+        });
     }
     
     }

@@ -8,7 +8,7 @@
 
 #import "AILinkedListObject.h"
 
-@interface AILinkedListObject (PRIVATE)
+@interface AILinkedListObject ()
 @property (weak, readwrite) AILinkedListObject *lastObject;
 @end
 
