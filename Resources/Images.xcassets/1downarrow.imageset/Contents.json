@@ -2,11 +2,12 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x",
-      "filename" : "1downarrow.png"
+      "filename" : "1downarrow.png",
+      "scale" : "1x"
     },
     {
       "idiom" : "universal",
+      "filename" : "Action-arrow-blue-down-icon.png",
       "scale" : "2x"
     },
     {

@@ -2,11 +2,12 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x",
-      "filename" : "barbg.png"
+      "filename" : "barbg.png",
+      "scale" : "1x"
     },
     {
       "idiom" : "universal",
+      "filename" : "barbg2.png",
       "scale" : "2x"
     },
     {
