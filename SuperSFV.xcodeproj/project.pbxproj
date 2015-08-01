@@ -145,7 +145,6 @@
 				4E4AC9560AB7E6130046762E /* License.txt */,
 				4E283F5C0AB657F9007B4BFC /* SuperSFVHelp */,
 				5542CD111A3173350081E21E /* Images.xcassets */,
-				4E707D690AB0BFE500138F41 /* Images */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				5542CD171A3173920081E21E /* InfoPlist.strings */,
 				5542CD0A1A316F380081E21E /* MainMenu.xib */,
@@ -160,13 +159,6 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		4E707D690AB0BFE500138F41 /* Images */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

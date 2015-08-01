@@ -13,11 +13,15 @@
 				<string>SFV</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
-			<string>schedule.icns</string>
+			<string>schedule</string>
 			<key>CFBundleTypeName</key>
 			<string>Simple File Verification file</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.reikon.sfv</string>
+			</array>
 			<key>LSTypeIsPackage</key>
 			<false/>
 			<key>NSPersistentStoreTypeKey</key>
@@ -58,5 +62,32 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Simple File Verification file</string>
+			<key>UTTypeIconFile</key>
+			<string>schedule</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.reikon.sfv</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>sfv</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>text/x-sfv</string>
+					<string>text/sfv</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>
