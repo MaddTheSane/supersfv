@@ -14,7 +14,7 @@
 	AILinkedListObject *front, *back;
 }
 /* Returns the object */
-- (id)objectAtIndex:(unsigned)index; /* O(N) */
+- (id)objectAtIndex:(NSInteger)index; /* O(N) */
 - (id)objectAtFront; /* O(1) */
 - (id)objectAtEnd; /* O(1) */
 

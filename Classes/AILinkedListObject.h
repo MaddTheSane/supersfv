@@ -17,5 +17,5 @@
 - (void)setNextObject:(AILinkedListObject *)theObject;
 
 @property (weak, readonly) AILinkedListObject *lastObject;
-@property (weak, nonatomic) AILinkedListObject *nextObject;
+@property (strong, nonatomic) AILinkedListObject *nextObject;
 @end

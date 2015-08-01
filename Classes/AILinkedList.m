@@ -60,7 +60,7 @@
 			current = back;
 		
 		else {
-			unsigned i;
+			NSUInteger i;
 			current = front;
 			
 			for (i=0; i<index; i++) {
@@ -71,7 +71,7 @@
 	return current;
 }
 
-- (id)objectAtIndex:(unsigned)index {
+- (id)objectAtIndex:(NSInteger)index {
 	id theObject;
 	@synchronized(self) {
 		theObject = [[self linkedListObjectAtIndex:index] object];

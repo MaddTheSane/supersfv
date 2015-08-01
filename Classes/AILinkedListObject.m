@@ -17,7 +17,13 @@
 @synthesize nextObject = next;
 @synthesize object;
 
-- (AILinkedListObject *)initWithObject:(id)theObject {
+- (instancetype)init
+{
+    self = [self initWithObject:nil];
+    return nil;
+}
+
+- (instancetype)initWithObject:(id)theObject {
 	if ((self = [super init])) {
 		object = theObject;
 		last = nil;

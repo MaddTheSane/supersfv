@@ -20,8 +20,7 @@
 #import "SPSuperSFV.h"
 #import "SPFileEntry.h"
 
-#include <openssl/md5.h>
-#include <openssl/sha.h>
+#include <CommonCrypto/CommonCrypto.h>
 #include "crc32.h"
 
 #define SuperSFVToolbarIdentifier    @"SuperSFV Toolbar Identifier"
@@ -145,7 +144,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
     NSMutableArray *t = [[NSMutableArray alloc] initWithCapacity:1];
 	[t addObjectsFromArray:records];
 	[records removeAllObjects];
-    for (id i in t)
+    for (SPFileEntry *i in t)
         [self processFiles:@[[i properties][@"filepath"]]];
     [self updateUI];
 }
@@ -309,15 +308,15 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
         do_endProgress++; // don't care about doing endProgress unless the progress has been init-ed
         
         crc32_t crc;
-        MD5_CTX md5_ctx;
-        SHA_CTX sha_ctx;
+        CC_MD5_CTX md5_ctx;
+        CC_SHA1_CTX sha_ctx;
         
         if (!algorithm) {
             crc = crc32(0L,Z_NULL,0);
         } else if (algorithm == 1) {
-            MD5_Init(&md5_ctx);
+            CC_MD5_Init(&md5_ctx);
         } else { // algorithm == 2
-            SHA1_Init(&sha_ctx);
+            CC_SHA1_Init(&sha_ctx);
         }
         
         while ((bytes = fread (data, 1, 1024, inFile)) != 0) {
@@ -329,14 +328,15 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
                     crc = crc32(crc, data, bytes);
                     break;
                 case 1:
-                    MD5_Update(&md5_ctx, data, bytes);
+                    CC_MD5_Update(&md5_ctx, data, bytes);
                     break;
                 case 2:
-                    SHA1_Update(&sha_ctx, data, bytes);
+                    CC_SHA1_Update(&sha_ctx, data, bytes);
                     break;
             }
             RunOnMainThreadSync(^{
-                [self updateProgress:@[@([progressBar_progress doubleValue]+(double)bytes), @""]];
+                progressBar_progress.doubleValue += bytes;
+                //[self updateProgress:@[@([progressBar_progress doubleValue]+(double)bytes), @""]];
             });
         }
         
@@ -352,9 +352,9 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
                 dgst = (u8 *) calloc (((algorithm == 1)?32:40), sizeof(u8));
                 
                 if (algorithm == 1)
-                    MD5_Final(dgst,&md5_ctx);
+                    CC_MD5_Final(dgst,&md5_ctx);
                 else if (algorithm == 2)
-                    SHA1_Final(dgst,&sha_ctx);
+                    CC_SHA1_Final(dgst,&sha_ctx);
                 
                 int i;
                 for (i = 0; i < ((algorithm == 1)?16:20); i++)
@@ -367,12 +367,12 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
         
         if (![hash isEqualToString:@""])
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:@[[[hash uppercaseString] isEqualToString:result]?[NSImage imageNamed:@"button_ok"]:[NSImage imageNamed:@"button_cancel"],
+                        initWithObjects:@[[[hash uppercaseString] isEqualToString:result]?[NSImage imageNamed:NSImageNameStatusAvailable]:[NSImage imageNamed:NSImageNameStatusUnavailable],
                             file, [hash uppercaseString], result] 
                                 forKeys:[newEntry defaultKeys]]];
         else
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:@[[NSImage imageNamed:@"button_ok"],
+                        initWithObjects:@[[NSImage imageNamed:NSImageNameStatusAvailable],
                             file, result, result]
                                 forKeys:[newEntry defaultKeys]]];
         
@@ -497,7 +497,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
                 continue;
             }
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:@[[NSImage imageNamed: @"button_cancel.png"], file, @"", @""] 
+                        initWithObjects:@[[NSImage imageNamed: NSImageNameStopProgressFreestandingTemplate], file, @"", @""]
                                 forKeys:[newEntry defaultKeys]]];
             
             [pendingFiles enqueue:newEntry];
@@ -528,7 +528,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
         // file doesn't exist...
         if (![[NSFileManager defaultManager] fileExistsAtPath:newPath]) {
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:@[[NSImage imageNamed: @"error.png"], newPath, hash, @"Missing"] 
+                        initWithObjects:@[[NSImage imageNamed: NSImageNameStatusNone], newPath, hash, @"Missing"]
                                 forKeys:[newEntry defaultKeys]]];
             errc++;
         }
@@ -536,7 +536,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
         // length doesn't match CRC32, MD5 or SHA-1 respectively
         if ([hash length] != 8 && [hash length] != 32 && [hash length] != 40) {
             [newEntry setProperties:[[NSMutableDictionary alloc] 
-                        initWithObjects:@[[NSImage imageNamed: @"error.png"],newPath, 
+                        initWithObjects:@[[NSImage imageNamed: NSImageNameStatusPartiallyAvailable],newPath,
                                             @"Unknown (not recognized)",[newEntry properties][@"result"]] 
                                 forKeys:[newEntry defaultKeys]]];
             errc++;
@@ -549,7 +549,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
             continue;
         }
         // assume it'll fail until proven otherwise
-        [newEntry setProperties:[NSMutableDictionary dictionaryWithObjects:@[[NSImage imageNamed: @"button_cancel.png"], newPath, hash, @""] 
+        [newEntry setProperties:[NSMutableDictionary dictionaryWithObjects:@[[NSImage imageNamed: NSImageNameStatusUnavailable], newPath, hash, @""]
                                 forKeys:[newEntry defaultKeys]]];
         
         [pendingFiles enqueue:newEntry];
@@ -694,7 +694,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
         [toolbarItem setLabel: @"Add"];
         [toolbarItem setPaletteLabel: @"Add"];
         [toolbarItem setToolTip: @"Add a file or the contents of a folder"];
-        [toolbarItem setImage: [NSImage imageNamed: @"edit_add"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(addClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -706,7 +706,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
         [toolbarItem setLabel: @"Remove"];
         [toolbarItem setPaletteLabel: @"Remove"];
         [toolbarItem setToolTip: @"Remove selected items or prompt to remove all items if none are selected"];
-        [toolbarItem setImage: [NSImage imageNamed: @"edit_remove"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRemoveTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(removeClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -718,7 +718,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
         [toolbarItem setLabel: @"Recalculate"];
         [toolbarItem setPaletteLabel: @"Recalculate"];
         [toolbarItem setToolTip: @"Recalculate checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: @"reload"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRefreshTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(recalculateClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -730,7 +730,7 @@ static inline void RunOnMainThreadSync(dispatch_block_t theBlock)
         [toolbarItem setLabel: @"Stop"];
         [toolbarItem setPaletteLabel: @"Stop"];
         [toolbarItem setToolTip: @"Stop calculating checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: @"stop"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameStopProgressTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(stopClicked:)];
         [toolbarItem setAutovalidates: NO];
