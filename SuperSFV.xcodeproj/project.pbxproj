@@ -14,6 +14,7 @@
 		4E593E6B0AB371450092AE43 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E593E6A0AB371450092AE43 /* crc32.c */; };
 		4E971A930AB0FCF0005F28B2 /* SPSuperSFV.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */; };
 		5542CD121A3173350081E21E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD111A3173350081E21E /* Images.xcassets */; };
+		55E2DE881B6DECB3006EE5C7 /* SPSuperSFV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E2DE871B6DECB3006EE5C7 /* SPSuperSFV.swift */; };
 		55EAFC9B1A318722002E6E2E /* FileEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EAFC9A1A318722002E6E2E /* FileEntry.swift */; };
 		6D9FD368109DD83600729576 /* SPIntegrityOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D9FD367109DD83600729576 /* SPIntegrityOperation.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.xib */; };
@@ -41,6 +42,7 @@
 		4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPSuperSFV.m; sourceTree = "<group>"; usesTabs = 1; };
 		5542CD111A3173350081E21E /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		5542CD1A1A3174A70081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		55E2DE871B6DECB3006EE5C7 /* SPSuperSFV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SPSuperSFV.swift; sourceTree = "<group>"; };
 		55EAFC991A318721002E6E2E /* SuperSFV-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SuperSFV-Bridging-Header.h"; sourceTree = "<group>"; };
 		55EAFC9A1A318722002E6E2E /* FileEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEntry.swift; sourceTree = "<group>"; };
 		6D9FD366109DD83600729576 /* SPIntegrityOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPIntegrityOperation.h; sourceTree = "<group>"; usesTabs = 0; };
@@ -153,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				55EAFC9A1A318722002E6E2E /* FileEntry.swift */,
+				55E2DE871B6DECB3006EE5C7 /* SPSuperSFV.swift */,
 			);
 			name = Swift;
 			sourceTree = "<group>";
@@ -229,6 +232,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55E2DE881B6DECB3006EE5C7 /* SPSuperSFV.swift in Sources */,
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				4E971A930AB0FCF0005F28B2 /* SPSuperSFV.m in Sources */,
 				4E593D6E0AB3465E0092AE43 /* SPTableView.m in Sources */,

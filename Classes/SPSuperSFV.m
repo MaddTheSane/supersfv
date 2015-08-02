@@ -631,7 +631,7 @@
         [toolbarItem setLabel: @"Add"];
         [toolbarItem setPaletteLabel: @"Add"];
         [toolbarItem setToolTip: @"Add a file or the contents of a folder"];
-        [toolbarItem setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
+        [toolbarItem setImage: [NSImage imageNamed: @"edit_add"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(addClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -643,7 +643,7 @@
         [toolbarItem setLabel: @"Remove"];
         [toolbarItem setPaletteLabel: @"Remove"];
         [toolbarItem setToolTip: @"Remove selected items or prompt to remove all items if none are selected"];
-        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRemoveTemplate]];
+        [toolbarItem setImage: [NSImage imageNamed: @"edit_remove"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(removeClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -655,7 +655,7 @@
         [toolbarItem setLabel: @"Recalculate"];
         [toolbarItem setPaletteLabel: @"Recalculate"];
         [toolbarItem setToolTip: @"Recalculate checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRefreshFreestandingTemplate]];
+        [toolbarItem setImage: [NSImage imageNamed: @"reload"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(recalculateClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -667,7 +667,7 @@
         [toolbarItem setLabel: @"Stop"];
         [toolbarItem setPaletteLabel: @"Stop"];
         [toolbarItem setToolTip: @"Stop calculating checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: NSImageNameStopProgressFreestandingTemplate]];
+        [toolbarItem setImage: [NSImage imageNamed: @"stop"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(stopClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -679,7 +679,7 @@
         [toolbarItem setLabel: @"Save"];
         [toolbarItem setPaletteLabel: @"Save"];
         [toolbarItem setToolTip: @"Save current state"];
-        [toolbarItem setImage: [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericHardDiskIcon)]];
+        [toolbarItem setImage: [NSImage imageNamed: @"1downarrow"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(saveClicked:)];
         [toolbarItem setAutovalidates: NO];
