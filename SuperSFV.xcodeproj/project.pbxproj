@@ -8,24 +8,26 @@
 
 /* Begin PBXBuildFile section */
 		4E283F5F0AB657F9007B4BFC /* SuperSFVHelp in Resources */ = {isa = PBXBuildFile; fileRef = 4E283F5C0AB657F9007B4BFC /* SuperSFVHelp */; };
+		4E4AC9570AB7E6130046762E /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD1B1A3174A70081E21E /* Credits.rtf */; };
 		4E4AC9580AB7E6130046762E /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E4AC9560AB7E6130046762E /* License.txt */; };
 		4E593D6E0AB3465E0092AE43 /* SPTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E593D6D0AB3465E0092AE43 /* SPTableView.m */; };
 		4E593DD90AB353A60092AE43 /* SPFileEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E593DD80AB353A60092AE43 /* SPFileEntry.m */; };
 		4E593E6B0AB371450092AE43 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E593E6A0AB371450092AE43 /* crc32.c */; };
 		4E971A930AB0FCF0005F28B2 /* SPSuperSFV.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */; };
-		5542CD0C1A316F380081E21E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD0A1A316F380081E21E /* MainMenu.xib */; };
 		5542CD121A3173350081E21E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD111A3173350081E21E /* Images.xcassets */; };
-		5542CD151A3173920081E21E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD171A3173920081E21E /* InfoPlist.strings */; };
-		5542CD191A3174A70081E21E /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD1B1A3174A70081E21E /* Credits.rtf */; };
 		6D9FD368109DD83600729576 /* SPIntegrityOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D9FD367109DD83600729576 /* SPIntegrityOperation.m */; };
+		8D11072A0486CEB800E47090 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.xib */; };
+		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		089C165DFE840E0CC02AAC07 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		29B97319FDCFA39411CA2CEA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		32CA4F630368D1EE00C91783 /* SuperSFV_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SuperSFV_Prefix.pch; sourceTree = "<group>"; };
@@ -39,11 +41,8 @@
 		4E593E6A0AB371450092AE43 /* crc32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32.c; sourceTree = "<group>"; };
 		4E971A910AB0FCF0005F28B2 /* SPSuperSFV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPSuperSFV.h; sourceTree = "<group>"; usesTabs = 1; };
 		4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPSuperSFV.m; sourceTree = "<group>"; usesTabs = 1; };
-		5542CD101A3171F60081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		5542CD111A3173350081E21E /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		5542CD161A3173920081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5542CD1A1A3174A70081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
-		558C332713A91A3E00EC0CAE /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = usr/lib/libcrypto.dylib; sourceTree = SDKROOT; };
 		6D9FD366109DD83600729576 /* SPIntegrityOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPIntegrityOperation.h; sourceTree = "<group>"; usesTabs = 0; };
 		6D9FD367109DD83600729576 /* SPIntegrityOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPIntegrityOperation.m; sourceTree = "<group>"; usesTabs = 0; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
@@ -67,10 +66,10 @@
 			children = (
 				4E971A910AB0FCF0005F28B2 /* SPSuperSFV.h */,
 				4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */,
-				4E593DD70AB353A60092AE43 /* SPFileEntry.h */,
-				4E593DD80AB353A60092AE43 /* SPFileEntry.m */,
 				4E593D6C0AB3465E0092AE43 /* SPTableView.h */,
 				4E593D6D0AB3465E0092AE43 /* SPTableView.m */,
+				4E593DD70AB353A60092AE43 /* SPFileEntry.h */,
+				4E593DD80AB353A60092AE43 /* SPFileEntry.m */,
 				6D9FD366109DD83600729576 /* SPIntegrityOperation.h */,
 				6D9FD367109DD83600729576 /* SPIntegrityOperation.m */,
 			);
@@ -81,7 +80,6 @@
 			isa = PBXGroup;
 			children = (
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
-				558C332713A91A3E00EC0CAE /* libcrypto.dylib */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -136,8 +134,8 @@
 				4E283F5C0AB657F9007B4BFC /* SuperSFVHelp */,
 				5542CD111A3173350081E21E /* Images.xcassets */,
 				8D1107310486CEB800E47090 /* Info.plist */,
-				5542CD171A3173920081E21E /* InfoPlist.strings */,
-				5542CD0A1A316F380081E21E /* MainMenu.xib */,
+				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+				29B97318FDCFA39411CA2CEA /* MainMenu.xib */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -206,10 +204,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5542CD0C1A316F380081E21E /* MainMenu.xib in Resources */,
-				5542CD151A3173920081E21E /* InfoPlist.strings in Resources */,
+				8D11072A0486CEB800E47090 /* MainMenu.xib in Resources */,
+				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				4E283F5F0AB657F9007B4BFC /* SuperSFVHelp in Resources */,
-				5542CD191A3174A70081E21E /* Credits.rtf in Resources */,
+				4E4AC9570AB7E6130046762E /* Credits.rtf in Resources */,
 				5542CD121A3173350081E21E /* Images.xcassets in Resources */,
 				4E4AC9580AB7E6130046762E /* License.txt in Resources */,
 			);
@@ -234,20 +232,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		5542CD0A1A316F380081E21E /* MainMenu.xib */ = {
+		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				5542CD101A3171F60081E21E /* en */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-		5542CD171A3173920081E21E /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5542CD161A3173920081E21E /* en */,
+				089C165DFE840E0CC02AAC07 /* en */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		29B97318FDCFA39411CA2CEA /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				29B97319FDCFA39411CA2CEA /* en */,
+			);
+			name = MainMenu.xib;
 			sourceTree = "<group>";
 		};
 		5542CD1B1A3174A70081E21E /* Credits.rtf */ = {
@@ -275,6 +273,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.reikon.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SuperSFV;
 				WRAPPER_EXTENSION = app;
 			};
@@ -290,6 +289,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.reikon.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SuperSFV;
 				WRAPPER_EXTENSION = app;
 			};
