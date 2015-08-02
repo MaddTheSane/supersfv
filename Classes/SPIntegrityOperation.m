@@ -19,6 +19,9 @@
 
 #import "SPIntegrityOperation.h"
 
+#include <CommonCrypto/CommonCrypto.h>
+#include "crc32.h"
+
 @implementation SPIntegrityOperation
 
 @synthesize hash;
@@ -96,8 +99,8 @@
 //                            waitUntilDone:YES];
 
         crc32_t crc;
-        MD5_CTX md5_ctx;
-        SHA_CTX sha_ctx;
+        CC_MD5_CTX md5_ctx;
+        CC_SHA1_CTX sha_ctx;
         
         switch (algorithm) {
             case SPCryptoAlgorithmCRC:
@@ -105,11 +108,11 @@
                 break;
                 
             case SPCryptoAlgorithmMD5:
-                MD5_Init(&md5_ctx);
+                CC_MD5_Init(&md5_ctx);
                 break;
                 
             case SPCryptoAlgorithmSHA1:
-                SHA1_Init(&sha_ctx);
+                CC_SHA1_Init(&sha_ctx);
                 
                 break;
                 
@@ -128,10 +131,10 @@
                     crc = crc32(crc, fileData.bytes, fileData.length);
                     break;
                 case SPCryptoAlgorithmMD5:
-                    MD5_Update(&md5_ctx, fileData.bytes, fileData.length);
+                    CC_MD5_Update(&md5_ctx, fileData.bytes, fileData.length);
                     break;
                 case SPCryptoAlgorithmSHA1:
-                    SHA1_Update(&sha_ctx, fileData.bytes, fileData.length);
+                    CC_SHA1_Update(&sha_ctx, fileData.bytes, fileData.length);
                     break;
             }
         }
@@ -150,11 +153,11 @@
             
             switch (algorithm) {
                 case SPCryptoAlgorithmSHA1:
-                    SHA1_Final(dgst,&sha_ctx);
+                    CC_SHA1_Final(dgst,&sha_ctx);
                     break;
                     
                 case SPCryptoAlgorithmMD5:
-                    MD5_Final(dgst,&md5_ctx);
+                    CC_MD5_Final(dgst,&md5_ctx);
                     break;
                     
                 default:

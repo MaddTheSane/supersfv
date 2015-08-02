@@ -18,12 +18,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
 #import "SPFileEntry.h"
-
-#include <openssl/md5.h>
-#include <openssl/sha.h>
-#include "crc32.h"
 
 typedef NS_ENUM(int, SPCryptoAlgorithm) {
 	SPCryptoAlgorithmUnknown = -1,
@@ -42,6 +37,6 @@ typedef NS_ENUM(int, SPCryptoAlgorithm) {
 
 @property (readonly) NSString *hash;
 
-- (id)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object;
-- (id)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
+- (instancetype)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object;
+- (instancetype)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
 @end
