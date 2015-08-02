@@ -65,8 +65,8 @@
 - (IBAction)stopClicked:(id)sender;
 
 - (void)parseSFVFile:(NSString *) filepath;
-- (void)processFiles:(NSArray *) filenames;
-- (void)removeSelectedRecords:(id) sender;
+- (void)processFiles:(NSArray<NSString*> *) filenames;
+- (IBAction)removeSelectedRecords:(id) sender;
 - (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 - (NSString *)_applicationVersion;
 

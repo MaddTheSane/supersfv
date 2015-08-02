@@ -88,7 +88,7 @@ static const crc32_t crc_table[256] = {
 #define DO8(buf)  DO4(buf); DO4(buf);
 
 /* ========================================================================= */
-crc32_t crc32(crc32_t crc, const unsigned char *buf, unsigned int len)
+crc32_t crc32(crc32_t crc, const unsigned char *buf, size_t len)
 {
     if (buf == Z_NULL) return 0L;
     crc = crc ^ 0xffffffffL;

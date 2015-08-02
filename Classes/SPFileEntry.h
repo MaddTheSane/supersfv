@@ -20,10 +20,24 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface SPFileEntry : NSObject
-@property (copy) NSDictionary *properties;
-@property (readonly, strong) NSArray *defaultKeys;
+typedef NS_ENUM(NSInteger, SPFileStatus) {
+	SPFileStatusUnknown = 0,
+	SPFileStatusChecking,
+	SPFileStatusValid,
+	SPFileStatusInvalid,
+	SPFileStatusFileNotFound,
+	SPFileStatusUnknownChecksum = -1
+};
 
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
+@interface SPFileEntry : NSObject
++ (NSImage*)imageForStatus:(SPFileStatus)status;
+
+@property SPFileStatus status;
+@property (readonly, copy) NSString *filePath;
+@property (copy) NSString *expected;
+@property (copy) NSString *result;
+
+- (instancetype)initWithPath:(NSString*)path;
+- (instancetype)initWithPath:(NSString*)path expectedHash:(NSString*)expected NS_DESIGNATED_INITIALIZER;
 
 @end

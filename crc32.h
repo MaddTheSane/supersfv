@@ -15,12 +15,16 @@
 extern "C" {
 #endif
 
+#ifndef __private_extern
+#define __private_extern __attribute__((visibility("hidden")))
+#endif
+
 typedef uint32_t crc32_t;
 #define Z_NULL  0
 
 #define crc32 uulib_crc32
 
-crc32_t crc32 _ANSI_ARGS_((crc32_t crc, const unsigned char *buf, unsigned int len));
+__private_extern crc32_t crc32 _ANSI_ARGS_((crc32_t crc, const unsigned char *buf, size_t len));
 /*
      Update a running crc with the bytes buf[0..len-1] and return the updated
    crc. If buf is NULL, this function returns the required initial value
