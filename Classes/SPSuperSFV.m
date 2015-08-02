@@ -142,12 +142,14 @@
 // Hmm... Is this OK?
 - (IBAction)recalculateClicked:(id)sender
 {
-    NSMutableArray *t = [[NSMutableArray alloc] initWithCapacity:1];
-	[t addObjectsFromArray:records];
+    NSArray *t = [records copy];
 	[records removeAllObjects];
+	NSMutableArray *fPath = [[NSMutableArray alloc] initWithCapacity:t.count];
+	
     for (SPFileEntry *i in t) {
-        [self processFiles:@[i.filePath]];
+		[fPath addObject:i.filePath];
     }
+	[self processFiles:fPath];
     [self updateUI];
 }
 
@@ -359,21 +361,29 @@
     // other 'stats' .. may be a bit sloppy
     int error_count = 0, failure_count = 0, verified_count = 0;
 
-    NSEnumerator *e = [records objectEnumerator];
-    SPFileEntry *entry;
-    while (entry = [e nextObject]) {
-        if ([entry.result isEqualToString:@"Missing"] ||
-            [entry.expected isEqualToString:@"Unknown (not recognized)"]) {
-                error_count++;
-                continue;
-        }
+    for (SPFileEntry *entry in records) {
+		switch (entry.status) {
+			case SPFileStatusFileNotFound:
+			case SPFileStatusUnknownChecksum:
+				error_count++;
+				continue;
+				break;
+				
+			default:
+				break;
+		}
 
+		if (entry.result == nil || [entry.result isEqualToString:@""] || entry.status == SPFileStatusValid) {
+			continue;
+		}
         if ([entry.expected compare:entry.result options:NSCaseInsensitiveSearch] != NSOrderedSame) {
+			entry.status = SPFileStatusInvalid;
             failure_count++;
             continue;
         }
 
         if ([entry.expected compare:entry.result options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+			entry.status = SPFileStatusValid;
             verified_count++;
             continue;
         }
@@ -438,15 +448,15 @@
          
     [queue addOperation: integrityOp];
 
-    NSString *fileName = entry.filePath;
-    NSString *expectedHash = entry.expected;
+    //NSString *fileName = entry.filePath;
+    //NSString *expectedHash = entry.expected;
 
-    SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:fileName expectedHash:expectedHash];
+    //SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:fileName expectedHash:expectedHash];
 
     /* TODO: Set image indicating "in progress" */
-    newEntry.status = SPFileStatusChecking;
+    entry.status = SPFileStatusChecking;
     
-    [records addObject:newEntry];
+    [records addObject:entry];
     
     /* If this was the first operation added to the queue */
     if ([queue operationCount] == 1)
@@ -462,7 +472,7 @@
 
 - (void)parseSFVFile:(NSString *) filepath
 {
-    NSArray *contents = [[NSString stringWithContentsOfFile:filepath usedEncoding:NULL error:NULL] componentsSeparatedByString:@"\n"];
+    NSArray *contents = [[[NSString alloc] initWithContentsOfFile:filepath usedEncoding:NULL error:NULL] componentsSeparatedByString:@"\n"];
     
     for (__strong NSString *entry in contents) {
         int errc = 0; // error count
@@ -477,7 +487,7 @@
 
         NSRange r = [entry rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@" "] options:NSBackwardsSearch];
         newPath = [[filepath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[entry substringToIndex:r.location]];
-        hash = [entry substringFromIndex:(r.location+1)]; // +1 so we don't capture the space
+        hash = [entry substringFromIndex:NSMaxRange(r)]; // +1 so we don't capture the space
 
         SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:newPath expectedHash:hash];
 
@@ -599,7 +609,7 @@
     [toolbar setAutosavesConfiguration: YES];
     [toolbar setDisplayMode: NSToolbarDisplayModeIconOnly];
     //toolbar.sizeMode = NSToolbarSizeModeSmall;
-
+	
     [toolbar setDelegate: self];
     [window_main setToolbar: toolbar];
 }
@@ -616,7 +626,7 @@
         [toolbarItem setLabel: @"Add"];
         [toolbarItem setPaletteLabel: @"Add"];
         [toolbarItem setToolTip: @"Add a file or the contents of a folder"];
-        [toolbarItem setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
+        [toolbarItem setImage: [NSImage imageNamed: @"edit_add"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(addClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -628,7 +638,7 @@
         [toolbarItem setLabel: @"Remove"];
         [toolbarItem setPaletteLabel: @"Remove"];
         [toolbarItem setToolTip: @"Remove selected items or prompt to remove all items if none are selected"];
-        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRemoveTemplate]];
+        [toolbarItem setImage: [NSImage imageNamed: @"edit_remove"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(removeClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -640,7 +650,7 @@
         [toolbarItem setLabel: @"Recalculate"];
         [toolbarItem setPaletteLabel: @"Recalculate"];
         [toolbarItem setToolTip: @"Recalculate checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRefreshTemplate]];
+        [toolbarItem setImage: [NSImage imageNamed: @"reload"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(recalculateClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -652,7 +662,7 @@
         [toolbarItem setLabel: @"Stop"];
         [toolbarItem setPaletteLabel: @"Stop"];
         [toolbarItem setToolTip: @"Stop calculating checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: NSImageNameStopProgressTemplate]];
+        [toolbarItem setImage: [NSImage imageNamed: @"stop"]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(stopClicked:)];
         [toolbarItem setAutovalidates: NO];

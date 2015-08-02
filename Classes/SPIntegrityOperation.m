@@ -166,6 +166,8 @@
             free(dgst);
         }
         
+        fileEntry.result = hash;
+        
         /* SPFileEntry *newEntry = [[SPFileEntry alloc] init];
         NSDictionary *newDict;
 
