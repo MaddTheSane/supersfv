@@ -65,8 +65,8 @@
 - (IBAction)stopClicked:(id)sender;
 
 - (void)parseSFVFile:(NSString *) filepath;
-- (void)processFiles:(NSArray *) filenames;
-- (void)removeSelectedRecords:(id) sender;
+- (void)processFiles:(NSArray<NSString*> *) filenames;
+- (IBAction)removeSelectedRecords:(id) sender;
 @property (readonly, copy) NSString *_applicationVersion;
 
 - (void)sortWithDescriptor:(NSSortDescriptor*)descriptor;

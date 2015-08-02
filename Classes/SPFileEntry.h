@@ -18,27 +18,26 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "SPFileEntry.h"
 
-@class FileEntry;
 
-typedef NS_ENUM(int, SPCryptoAlgorithm) {
-	SPCryptoAlgorithmUnknown = -1,
-	SPCryptoAlgorithmCRC = 0,
-	SPCryptoAlgorithmMD5,
-	SPCryptoAlgorithmSHA1
+typedef NS_ENUM(NSInteger, SPFileStatus) {
+	SPFileStatusUnknown = 0,
+	SPFileStatusChecking,
+	SPFileStatusValid,
+	SPFileStatusInvalid,
+	SPFileStatusFileNotFound,
+	SPFileStatusUnknownChecksum = -1
 };
 
-@interface SPIntegrityOperation : NSOperation {
-@private
-	FileEntry *fileEntry;
-    NSObject *target;
-    SPCryptoAlgorithm cryptoAlgorithm;
-    NSString *hash;
-}
+@interface SPFileEntry : NSObject
++ (NSImage*)imageForStatus:(SPFileStatus)status;
 
-@property (readonly) NSString *hashString;
+@property SPFileStatus status;
+@property (readonly, copy) NSString *filePath;
+@property (copy) NSString *expected;
+@property (copy) NSString *result;
 
-- (instancetype)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object;
-- (instancetype)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
+- (instancetype)initWithPath:(NSString*)path;
+- (instancetype)initWithPath:(NSString*)path expectedHash:(NSString*)expected NS_DESIGNATED_INITIALIZER;
+
 @end

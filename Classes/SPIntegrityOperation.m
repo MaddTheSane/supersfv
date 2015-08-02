@@ -20,6 +20,9 @@
 #import "SPIntegrityOperation.h"
 #import "SuperSFV-Swift.h"
 
+#include <CommonCrypto/CommonCrypto.h>
+#include "crc32.h"
+
 @implementation SPIntegrityOperation
 
 @synthesize hashString = hash;
@@ -45,24 +48,22 @@
 {
 	@autoreleasepool {
 
-    NSLog(@"Running for file %@", [[fileEntry properties] objectForKey:@"filepath"]);
+    NSLog(@"Running for file %@", fileEntry.filePath);
 
 	if (![self isCancelled])
 	{
         SPCryptoAlgorithm algorithm;
         uint8_t *dgst; // buffers
         
-        NSString *file = [[fileEntry properties] objectForKey:@"filepath"];
-        NSString *expectedHash = [[fileEntry properties] objectForKey:@"expected"];
+        NSString *file = fileEntry.filePath;
+        NSString *expectedHash = fileEntry.expected;
 
         NSFileManager *dm = [NSFileManager defaultManager];
         NSDictionary *fileAttributes = [dm attributesOfItemAtPath:file error:NULL];
 
 
-        if (cryptoAlgorithm == SPCryptoAlgorithmUnknown)
-        {
-            switch ([expectedHash length])
-            {
+        if (cryptoAlgorithm == SPCryptoAlgorithmUnknown) {
+            switch ([expectedHash length]) {
                 case 8:
                     algorithm = SPCryptoAlgorithmCRC;
                     break;
@@ -76,9 +77,7 @@
                     algorithm = SPCryptoAlgorithmCRC;
                     break;
             }
-        }
-        else
-        {
+        } else {
             algorithm = cryptoAlgorithm;
         }
 		
@@ -97,8 +96,8 @@
 //                            waitUntilDone:YES];
 
         crc32_t crc;
-        MD5_CTX md5_ctx;
-        SHA_CTX sha_ctx;
+        CC_MD5_CTX md5_ctx;
+        CC_SHA1_CTX sha_ctx;
         
         switch (algorithm) {
             case SPCryptoAlgorithmCRC:
@@ -106,11 +105,11 @@
                 break;
                 
             case SPCryptoAlgorithmMD5:
-                MD5_Init(&md5_ctx);
+                CC_MD5_Init(&md5_ctx);
                 break;
                 
             case SPCryptoAlgorithmSHA1:
-                SHA1_Init(&sha_ctx);
+                CC_SHA1_Init(&sha_ctx);
                 
                 break;
                 
@@ -118,9 +117,9 @@
                 break;
         }
 		
-		NSData *fileData = nil;
+		NSData *fileData;
 		
-        while ((fileData = [fileHandle readDataOfLength:1024]).length > 0) {
+        while ((fileData = [fileHandle readDataOfLength:65536]).length > 0) {
             if ([self isCancelled])
                 break;
             
@@ -129,15 +128,15 @@
                     crc = crc32(crc, fileData.bytes, fileData.length);
                     break;
                 case SPCryptoAlgorithmMD5:
-                    MD5_Update(&md5_ctx, fileData.bytes, fileData.length);
+                    CC_MD5_Update(&md5_ctx, fileData.bytes, (CC_LONG)fileData.length);
                     break;
                 case SPCryptoAlgorithmSHA1:
-                    SHA1_Update(&sha_ctx, fileData.bytes, fileData.length);
+                    CC_SHA1_Update(&sha_ctx, fileData.bytes, (CC_LONG)fileData.length);
                     break;
             }
         }
 		fileHandle = nil;
-		NSLog(@"Finished with file %@", [[fileEntry properties] objectForKey:@"filepath"]);
+		NSLog(@"Finished with file %@", fileEntry.filePath);
         
 
         if ([self isCancelled])
@@ -147,15 +146,15 @@
             hash = [[NSString stringWithFormat:@"%08x", crc] uppercaseString];
         } else {
             hash = @"";
-            dgst = (uint8_t *) calloc (((algorithm == 1)?32:40), sizeof(uint8_t));
+            dgst = (uint8_t *) calloc (((algorithm == SPCryptoAlgorithmMD5)?32:40), sizeof(uint8_t));
             
             switch (algorithm) {
                 case SPCryptoAlgorithmSHA1:
-                    SHA1_Final(dgst,&sha_ctx);
+                    CC_SHA1_Final(dgst,&sha_ctx);
                     break;
                     
                 case SPCryptoAlgorithmMD5:
-                    MD5_Final(dgst,&md5_ctx);
+                    CC_MD5_Final(dgst,&md5_ctx);
                     break;
                     
                 default:
@@ -167,6 +166,8 @@
             
             free(dgst);
         }
+        
+        fileEntry.result = hash;
         
         /* SPFileEntry *newEntry = [[SPFileEntry alloc] init];
         NSDictionary *newDict;

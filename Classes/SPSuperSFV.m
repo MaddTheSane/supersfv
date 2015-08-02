@@ -31,8 +31,8 @@
 #define SaveToolbarIdentifier        @"Save Toolbar Identifier"
 
 #pragma mark Private methods
-@interface SPSuperSFV (private)
-- (void)queueEntry:(FileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm;
+@interface SPSuperSFV ()
+- (void)queueEntry:(SPFileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm;
 - (void)updateUI;
 - (void)startProcessingQueue;
 - (void)stopProcessingQueue;
@@ -143,11 +143,14 @@
 // Hmm... Is this OK?
 - (IBAction)recalculateClicked:(id)sender
 {
-    NSMutableArray *t = [[NSMutableArray alloc] initWithCapacity:1];
-	[t addObjectsFromArray:records];
+    NSArray *t = [records copy];
 	[records removeAllObjects];
-    for (id i in t)
-        [self processFiles:@[[i properties][@"filepath"]]];
+	NSMutableArray *fPath = [[NSMutableArray alloc] initWithCapacity:t.count];
+	
+    for (SPFileEntry *i in t) {
+		[fPath addObject:i.filePath];
+    }
+	[self processFiles:fPath];
     [self updateUI];
 }
 
@@ -189,13 +192,13 @@
                 // shameless plug to start out with
                 NSString *output = [NSString stringWithFormat:@"; Created using SuperSFV v%@ on Mac OS X", [self _applicationVersion]];
                 
-                for (FileEntry *entry in records) {
-                    if ((![[entry properties][@"result"] isEqualToString:@"Missing"])
-                        && (![[entry properties][@"result"] isEqualToString:@""])) {
-                        
+                for (SPFileEntry *entry in records) {
+                    if ((![entry.result isEqualToString:@"Missing"])
+                        && (![entry.result isEqualToString:@""])) {
+						
                         output = [output stringByAppendingFormat:@"\n%@ %@",
-                                  [[entry properties][@"filepath"] lastPathComponent],
-                                  [entry properties][@"result"]];
+                                  [entry.filePath lastPathComponent],
+                                  entry.result];
                     }
                 }
                 
@@ -298,6 +301,11 @@
     return YES;
 }
 
+-(void)application:(NSApplication *)sender openFiles:(NSArray<NSString *> *)filenames
+{
+    [self processFiles:filenames];
+}
+
 // remove selected records from our table view
 - (void)removeSelectedRecords:(id)ssender
 {
@@ -353,24 +361,34 @@
     [button_recalculate setEnabled:([records count] > 0)];
     [button_remove setEnabled:([records count] > 0)];
     [button_save setEnabled:([records count] > 0)];
-    [textField_fileCount setIntValue:[records count]];
+    [textField_fileCount setIntegerValue:[records count]];
 
     // other 'stats' .. may be a bit sloppy
     int error_count = 0, failure_count = 0, verified_count = 0;
-    
-    for (FileEntry *entry in records) {
-        if ([[entry properties][@"result"] isEqualToString:@"Missing"] ||
-            [[entry properties][@"expected"] isEqualToString:@"Unknown (not recognized)"]) {
-                error_count++;
-                continue;
-        }
 
-        if (![[entry properties][@"expected"] isEqualToString:[entry properties][@"result"]]) {
+    for (SPFileEntry *entry in records) {
+		switch (entry.status) {
+			case SPFileStatusFileNotFound:
+			case SPFileStatusUnknownChecksum:
+				error_count++;
+				continue;
+				break;
+				
+			default:
+				break;
+		}
+
+		if (entry.result == nil || [entry.result isEqualToString:@""] || entry.status == SPFileStatusValid) {
+			continue;
+		}
+        if ([entry.expected compare:entry.result options:NSCaseInsensitiveSearch] != NSOrderedSame) {
+			entry.status = SPFileStatusInvalid;
             failure_count++;
             continue;
         }
 
-        if ([[entry properties][@"expected"] isEqualToString:[entry properties][@"result"]]) {
+        if ([entry.expected compare:entry.result options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+			entry.status = SPFileStatusValid;
             verified_count++;
             continue;
         }
@@ -410,23 +428,18 @@
                 continue;
             }
 
-            FileEntry *newEntry = [[FileEntry alloc] init];
-            NSDictionary *newDict = [[NSMutableDictionary alloc]
-                        initWithObjects:@[[NSImage imageNamed: @"button_cancel.png"], file, @"", @""]
-                                forKeys:[newEntry defaultKeys]];
+            SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:file];
 
-            [newEntry setProperties:newDict];
-
-            [self queueEntry:newEntry withAlgorithm:[popUpButton_checksum indexOfSelectedItem]];
+            [self queueEntry:newEntry withAlgorithm:(SPCryptoAlgorithm)[popUpButton_checksum indexOfSelectedItem]];
         }
     }
 }
 
-- (void)queueEntry:(FileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm
+- (void)queueEntry:(SPFileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm
 {
     SPIntegrityOperation *integrityOp;
 
-    if (algorithm == -1)
+    if (algorithm == SPCryptoAlgorithmUnknown)
     {
         integrityOp = [[SPIntegrityOperation alloc] initWithFileEntry:entry
                                                                target:self];
@@ -440,20 +453,15 @@
          
     [queue addOperation: integrityOp];
 
-    NSString *fileName = [[entry properties] objectForKey:@"filepath"];
-    NSString *expectedHash = [[entry properties] objectForKey:@"expected"];
+    //NSString *fileName = entry.filePath;
+    //NSString *expectedHash = entry.expected;
 
-    FileEntry *newEntry = [[FileEntry alloc] init];
-    NSDictionary *newDict;
+    //SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:fileName expectedHash:expectedHash];
 
     /* TODO: Set image indicating "in progress" */
-    newDict = [[NSMutableDictionary alloc] initWithObjects:[NSArray arrayWithObjects:
-                                                            [NSImage imageNamed:@"NSApplicationIcon"], fileName, expectedHash, @"", nil]
-                                                   forKeys:[newEntry defaultKeys]];
+    entry.status = SPFileStatusChecking;
     
-    [newEntry setProperties:newDict];
-    
-    [records addObject:newEntry];
+    [records addObject:entry];
     
     /* If this was the first operation added to the queue */
     if ([queue operationCount] == 1)
@@ -469,7 +477,7 @@
 
 - (void)parseSFVFile:(NSString *) filepath
 {
-    NSArray *contents = [[NSString stringWithContentsOfFile:filepath usedEncoding:NULL error:NULL] componentsSeparatedByString:@"\n"];
+    NSArray *contents = [[[NSString alloc] initWithContentsOfFile:filepath usedEncoding:NULL error:NULL] componentsSeparatedByString:@"\n"];
     
     for (__strong NSString *entry in contents) {
         int errc = 0; // error count
@@ -484,28 +492,21 @@
 
         NSRange r = [entry rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@" "] options:NSBackwardsSearch];
         newPath = [[filepath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[entry substringToIndex:r.location]];
-        hash = [entry substringFromIndex:(r.location+1)]; // +1 so we don't capture the space
+        hash = [entry substringFromIndex:NSMaxRange(r)]; // +1 so we don't capture the space
 
-        FileEntry *newEntry = [[FileEntry alloc] init];
-        NSDictionary *newDict;
+        SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:newPath expectedHash:hash];
 
         // file doesn't exist...
         if (![[NSFileManager defaultManager] fileExistsAtPath:newPath]) {
-            newDict = [[NSMutableDictionary alloc]
-                        initWithObjects:@[[NSImage imageNamed: @"error.png"], newPath, hash, @"Missing"]
-                                forKeys:[newEntry defaultKeys]];
-            [newEntry setProperties:newDict];
+            newEntry.status = SPFileStatusFileNotFound;
+            newEntry.result = @"Missing";
             errc++;
         }
 
         // length doesn't match CRC32, MD5 or SHA-1 respectively
         if ([hash length] != 8 && [hash length] != 32 && [hash length] != 40) {
-            newDict = [[NSMutableDictionary alloc]
-                        initWithObjects:@[[NSImage imageNamed: @"error.png"],newPath,
-                                            @"Unknown (not recognized)",[[newEntry properties] objectForKey:@"result"]]
-                                forKeys:[newEntry defaultKeys]];
-
-            [newEntry setProperties:newDict];
+            newEntry.status = SPFileStatusUnknownChecksum;
+            newEntry.expected = @"Unknown";
             errc++;
         }
         
@@ -516,12 +517,9 @@
             continue;
         }
         // assume it'll fail until proven otherwise
-        newDict = [NSMutableDictionary dictionaryWithObjects:@[[NSImage imageNamed: @"button_cancel.png"], newPath, hash, @""]
-                                                     forKeys:[newEntry defaultKeys]];
+        newEntry.status = SPFileStatusInvalid;
 
-        [newEntry setProperties:newDict];
-
-        [self queueEntry:newEntry withAlgorithm:-1];
+        [self queueEntry:newEntry withAlgorithm:SPCryptoAlgorithmUnknown];
     }
 }
 
@@ -535,10 +533,23 @@
 - (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row
 {
     NSString *key = [column identifier];
-    FileEntry *newEntry = records[row];
-    if ([key isEqualToString:@"filepath"])
-        return [[newEntry properties][@"filepath"] lastPathComponent];
-    return [newEntry properties][key];
+    SPFileEntry *newEntry = records[row];
+    if ([key isEqualToString:@"filepath"]) {
+        return newEntry.filePath.lastPathComponent;
+    } else if ([key isEqualToString:@"status"]) {
+        return [SPFileEntry imageForStatus:newEntry.status];
+    } else if ([key isEqualToString:@"expected"]) {
+        if (newEntry.status == SPFileStatusUnknownChecksum) {
+            return @"Unknown (not recognized)";
+        }
+        return newEntry.expected;
+    } else if ([key isEqualToString:@"result"]) {
+        if (newEntry.status == SPFileStatusFileNotFound) {
+            return @"Missing";
+        }
+        return newEntry.result;
+    }
+    return @"";
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
@@ -567,7 +578,7 @@
 {
 	if (tableView==tableView_fileList) {
 		NSArray *allColumns = [tableView_fileList tableColumns];
-		int i;
+		NSInteger i;
 		for (i = 0; i < [tableView_fileList numberOfColumns]; i++)
 			if ([allColumns objectAtIndex:i] != tableColumn)
 				[tableView_fileList setIndicatorImage:nil inTableColumn:[allColumns objectAtIndex:i]];
@@ -586,8 +597,8 @@
 
 - (void)sortWithDescriptor:(NSSortDescriptor*)descriptor
 {
-	NSMutableArray *sorted = [[NSMutableArray alloc] initWithCapacity:1];
-	[sorted addObjectsFromArray:[records sortedArrayUsingDescriptors:@[descriptor]]];
+	NSMutableArray *sorted = [records mutableCopy];
+    [sorted sortUsingDescriptors:@[descriptor]];
 	[records removeAllObjects];
 	[records addObjectsFromArray:sorted];
 	[self updateUI];
@@ -602,7 +613,8 @@
     [toolbar setAllowsUserCustomization: YES];
     [toolbar setAutosavesConfiguration: YES];
     [toolbar setDisplayMode: NSToolbarDisplayModeIconOnly];
-
+    //toolbar.sizeMode = NSToolbarSizeModeSmall;
+	
     [toolbar setDelegate: self];
     [window_main setToolbar: toolbar];
 }
