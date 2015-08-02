@@ -21,6 +21,9 @@
 #import "SPFileEntry.h"
 #import "SPIntegrityOperation.h"
 
+#include <CommonCrypto/CommonCrypto.h>
+#include "crc32.h"
+
 #define SuperSFVToolbarIdentifier    @"SuperSFV Toolbar Identifier"
 #define AddToolbarIdentifier         @"Add Toolbar Identifier"
 #define RemoveToolbarIdentifier      @"Remove Toolbar Identifier"
@@ -145,7 +148,7 @@
     NSMutableArray *t = [[NSMutableArray alloc] initWithCapacity:1];
 	[t addObjectsFromArray:records];
 	[records removeAllObjects];
-    for (id i in t)
+    for (SPFileEntry *i in t)
         [self processFiles:@[[i properties][@"filepath"]]];
     [self updateUI];
 }
@@ -409,7 +412,7 @@
 
             SPFileEntry *newEntry = [[SPFileEntry alloc] init];
             NSDictionary *newDict = [[NSMutableDictionary alloc]
-                        initWithObjects:@[[NSImage imageNamed: @"button_cancel.png"], file, @"", @""]
+                        initWithObjects:@[[NSImage imageNamed: NSImageNameStopProgressFreestandingTemplate], file, @"", @""]
                                 forKeys:[newEntry defaultKeys]];
 
             [newEntry setProperties:newDict];
@@ -489,7 +492,7 @@
         // file doesn't exist...
         if (![[NSFileManager defaultManager] fileExistsAtPath:newPath]) {
             newDict = [[NSMutableDictionary alloc]
-                        initWithObjects:@[[NSImage imageNamed: @"error.png"], newPath, hash, @"Missing"]
+                        initWithObjects:@[[NSImage imageNamed: NSImageNameStatusNone], newPath, hash, @"Missing"]
                                 forKeys:[newEntry defaultKeys]];
             [newEntry setProperties:newDict];
             errc++;
@@ -498,7 +501,7 @@
         // length doesn't match CRC32, MD5 or SHA-1 respectively
         if ([hash length] != 8 && [hash length] != 32 && [hash length] != 40) {
             newDict = [[NSMutableDictionary alloc]
-                        initWithObjects:@[[NSImage imageNamed: @"error.png"],newPath,
+                        initWithObjects:@[[NSImage imageNamed: NSImageNameStatusPartiallyAvailable],newPath,
                                             @"Unknown (not recognized)",[[newEntry properties] objectForKey:@"result"]]
                                 forKeys:[newEntry defaultKeys]];
 
@@ -513,7 +516,7 @@
             continue;
         }
         // assume it'll fail until proven otherwise
-        newDict = [NSMutableDictionary dictionaryWithObjects:@[[NSImage imageNamed: @"button_cancel.png"], newPath, hash, @""]
+        newDict = [NSMutableDictionary dictionaryWithObjects:@[[NSImage imageNamed: NSImageNameStatusUnavailable], newPath, hash, @""]
                                                      forKeys:[newEntry defaultKeys]];
 
         [newEntry setProperties:newDict];
@@ -616,7 +619,7 @@
         [toolbarItem setLabel: @"Add"];
         [toolbarItem setPaletteLabel: @"Add"];
         [toolbarItem setToolTip: @"Add a file or the contents of a folder"];
-        [toolbarItem setImage: [NSImage imageNamed: @"edit_add"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(addClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -628,7 +631,7 @@
         [toolbarItem setLabel: @"Remove"];
         [toolbarItem setPaletteLabel: @"Remove"];
         [toolbarItem setToolTip: @"Remove selected items or prompt to remove all items if none are selected"];
-        [toolbarItem setImage: [NSImage imageNamed: @"edit_remove"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRemoveTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(removeClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -640,7 +643,7 @@
         [toolbarItem setLabel: @"Recalculate"];
         [toolbarItem setPaletteLabel: @"Recalculate"];
         [toolbarItem setToolTip: @"Recalculate checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: @"reload"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameRefreshTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(recalculateClicked:)];
         [toolbarItem setAutovalidates: NO];
@@ -652,7 +655,7 @@
         [toolbarItem setLabel: @"Stop"];
         [toolbarItem setPaletteLabel: @"Stop"];
         [toolbarItem setToolTip: @"Stop calculating checksums"];
-        [toolbarItem setImage: [NSImage imageNamed: @"stop"]];
+        [toolbarItem setImage: [NSImage imageNamed: NSImageNameStopProgressTemplate]];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(stopClicked:)];
         [toolbarItem setAutovalidates: NO];
