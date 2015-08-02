@@ -22,6 +22,30 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 
 	
 	
+	private let queue = NSOperationQueue()
+	private var records = [FileEntry]()
+	
+	func applicationShouldTerminateAfterLastWindowClosed(sender: NSApplication) -> Bool {
+		return true
+	}
+	
+	// MARK: private methods
+	private func queueEntry(entry: FileEntry, algorithm: SPCryptoAlgorithm) {
+		
+	}
+	
+	private func updateUI() {
+		
+	}
+	
+	private func startProcessingQueue() {
+		
+	}
+	
+	private func stopProcessingQueue() {
+		
+	}
+	
 	// MARK: Toolbar
 	func setupToolbar() {
 		let toolbar = NSToolbar(identifier: SuperSFVToolbarIdentifier)
@@ -125,7 +149,14 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		switch itemIdentifier {
 		case AddToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
-			
+			toolbarItem!.label = "Add"
+			toolbarItem!.paletteLabel = "Add"
+			toolbarItem!.toolTip = "Add a file or the contents of a folder"
+			toolbarItem!.image = NSImage(named: "edit_add")
+			toolbarItem!.target = self
+			toolbarItem!.action = "addClicked:"
+			toolbarItem!.autovalidates = false
+
 		default:
 			break
 		}

@@ -10,12 +10,12 @@ import Foundation
 import AppKit.NSImage
 
 @objc enum SPFileStatus : Int {
-	case Unknown
+	case Unknown = 0
 	case Checking
 	case Valid
 	case Invalid
 	case FileNotFound
-	case UnknownChecksum
+	case UnknownChecksum = -1
 }
 
 class FileEntry : NSObject {
