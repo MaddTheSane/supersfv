@@ -131,10 +131,10 @@
                     crc = crc32(crc, fileData.bytes, fileData.length);
                     break;
                 case SPCryptoAlgorithmMD5:
-                    CC_MD5_Update(&md5_ctx, fileData.bytes, fileData.length);
+                    CC_MD5_Update(&md5_ctx, fileData.bytes, (CC_LONG)fileData.length);
                     break;
                 case SPCryptoAlgorithmSHA1:
-                    CC_SHA1_Update(&sha_ctx, fileData.bytes, fileData.length);
+                    CC_SHA1_Update(&sha_ctx, fileData.bytes, (CC_LONG)fileData.length);
                     break;
             }
         }

@@ -33,7 +33,7 @@
 #define SaveToolbarIdentifier        @"Save Toolbar Identifier"
 
 #pragma mark Private methods
-@interface SPSuperSFV (private)
+@interface SPSuperSFV ()
 - (void)queueEntry:(SPFileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm;
 - (void)updateUI;
 - (void)startProcessingQueue;
@@ -351,7 +351,7 @@
     [button_recalculate setEnabled:([records count] > 0)];
     [button_remove setEnabled:([records count] > 0)];
     [button_save setEnabled:([records count] > 0)];
-    [textField_fileCount setIntValue:[records count]];
+    [textField_fileCount setIntegerValue:[records count]];
 
     // other 'stats' .. may be a bit sloppy
     int error_count = 0, failure_count = 0, verified_count = 0;
@@ -417,7 +417,7 @@
 
             [newEntry setProperties:newDict];
 
-            [self queueEntry:newEntry withAlgorithm:[popUpButton_checksum indexOfSelectedItem]];
+            [self queueEntry:newEntry withAlgorithm:(SPCryptoAlgorithm)[popUpButton_checksum indexOfSelectedItem]];
         }
     }
 }
