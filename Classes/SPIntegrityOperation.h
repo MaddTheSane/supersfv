@@ -18,7 +18,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "SPFileEntry.h"
 
 @class FileEntry;
 
@@ -39,6 +38,6 @@ typedef NS_ENUM(int, SPCryptoAlgorithm) {
 
 @property (readonly) NSString *hashString;
 
-- (instancetype)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object;
-- (instancetype)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
+- (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object;
+- (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
 @end

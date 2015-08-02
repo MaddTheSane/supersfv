@@ -32,7 +32,7 @@
 
 #pragma mark Private methods
 @interface SPSuperSFV ()
-- (void)queueEntry:(SPFileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm;
+- (void)queueEntry:(FileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm;
 - (void)updateUI;
 - (void)startProcessingQueue;
 - (void)stopProcessingQueue;
@@ -147,7 +147,7 @@
 	[records removeAllObjects];
 	NSMutableArray *fPath = [[NSMutableArray alloc] initWithCapacity:t.count];
 	
-    for (SPFileEntry *i in t) {
+    for (FileEntry *i in t) {
 		[fPath addObject:i.filePath];
     }
 	[self processFiles:fPath];
@@ -192,7 +192,7 @@
                 // shameless plug to start out with
                 NSString *output = [NSString stringWithFormat:@"; Created using SuperSFV v%@ on Mac OS X", [self _applicationVersion]];
                 
-                for (SPFileEntry *entry in records) {
+                for (FileEntry *entry in records) {
                     if ((![entry.result isEqualToString:@"Missing"])
                         && (![entry.result isEqualToString:@""])) {
 						
@@ -366,7 +366,7 @@
     // other 'stats' .. may be a bit sloppy
     int error_count = 0, failure_count = 0, verified_count = 0;
 
-    for (SPFileEntry *entry in records) {
+    for (FileEntry *entry in records) {
 		switch (entry.status) {
 			case SPFileStatusFileNotFound:
 			case SPFileStatusUnknownChecksum:
@@ -428,14 +428,14 @@
                 continue;
             }
 
-            SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:file];
+            FileEntry *newEntry = [[FileEntry alloc] initWithPath:file];
 
             [self queueEntry:newEntry withAlgorithm:(SPCryptoAlgorithm)[popUpButton_checksum indexOfSelectedItem]];
         }
     }
 }
 
-- (void)queueEntry:(SPFileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm
+- (void)queueEntry:(FileEntry *)entry withAlgorithm:(SPCryptoAlgorithm)algorithm
 {
     SPIntegrityOperation *integrityOp;
 
@@ -494,7 +494,7 @@
         newPath = [[filepath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[entry substringToIndex:r.location]];
         hash = [entry substringFromIndex:NSMaxRange(r)]; // +1 so we don't capture the space
 
-        SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:newPath expectedHash:hash];
+        FileEntry *newEntry = [[FileEntry alloc] initWithPath:newPath expectedHash:hash];
 
         // file doesn't exist...
         if (![[NSFileManager defaultManager] fileExistsAtPath:newPath]) {
@@ -533,11 +533,11 @@
 - (id)tableView:(NSTableView *)table objectValueForTableColumn:(NSTableColumn *)column row:(NSInteger)row
 {
     NSString *key = [column identifier];
-    SPFileEntry *newEntry = records[row];
+    FileEntry *newEntry = records[row];
     if ([key isEqualToString:@"filepath"]) {
         return newEntry.filePath.lastPathComponent;
     } else if ([key isEqualToString:@"status"]) {
-        return [SPFileEntry imageForStatus:newEntry.status];
+        return [FileEntry imageForStatus:newEntry.status];
     } else if ([key isEqualToString:@"expected"]) {
         if (newEntry.status == SPFileStatusUnknownChecksum) {
             return @"Unknown (not recognized)";
