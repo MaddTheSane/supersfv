@@ -1,3 +1,22 @@
+/*
+SuperSFV is the legal property of its developers, whose names are
+listed in the copyright file included with this source distribution.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
 //
 //  SPSuperSFV.swift
 //  SuperSFV
@@ -16,6 +35,8 @@ private let ChecksumToolbarIdentifier		= "Checksum Toolbar Identifier"
 private let StopToolbarIdentifier			= "Stop Toolbar Identifier"
 private let SaveToolbarIdentifier			= "Save Toolbar Identifier"
 
+let kRemoveRecordFromList = "RM_RECORD_FROM_LIST"
+
 private var applicationVersion: String {
 	let version = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String
 	return version ?? ""
@@ -24,29 +45,29 @@ private var applicationVersion: String {
 class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate {
 	@IBOutlet weak var buttonAdd: NSButton?
 	@IBOutlet weak var buttonCloseLicense: NSButton!
-	@IBOutlet weak var button_contact: NSButton?
-	@IBOutlet weak var button_easterEgg: NSButton!
-	@IBOutlet weak var button_recalculate: NSButton?
-	@IBOutlet weak var button_remove: NSButton?
-	@IBOutlet weak var button_save: NSButton?
-	@IBOutlet weak var button_showLicense: NSButton!
-	@IBOutlet weak var button_stop: NSButton?
-	@IBOutlet weak var panel_license: NSPanel!
-	@IBOutlet weak var popUpButton_checksum: NSPopUpButton!
-	@IBOutlet weak var progressBar_progress: NSProgressIndicator!
-	@IBOutlet weak var textField_errorCount: NSTextField!
-	@IBOutlet weak var textField_failedCount: NSTextField!
-	@IBOutlet weak var textField_fileCount: NSTextField!
-	@IBOutlet weak var textField_status: NSTextField!
-	@IBOutlet weak var textField_verifiedCount: NSTextField!
-	@IBOutlet weak var textField_version: NSTextField!
+	@IBOutlet weak var buttonContact: NSButton?
+	@IBOutlet weak var easterEggButton: NSButton!
+	@IBOutlet weak var buttonRecalculate: NSButton?
+	@IBOutlet weak var buttonRemove: NSButton?
+	@IBOutlet weak var buttonSave: NSButton?
+	@IBOutlet weak var buttonShowLicense: NSButton!
+	@IBOutlet weak var buttonStop: NSButton?
+	@IBOutlet weak var licensePanel: NSPanel!
+	@IBOutlet weak var checksumPopUp: NSPopUpButton!
+	@IBOutlet weak var progressBar: NSProgressIndicator!
+	@IBOutlet weak var errorCountField: NSTextField!
+	@IBOutlet weak var failedCountField: NSTextField!
+	@IBOutlet weak var fileCountField: NSTextField!
+	@IBOutlet weak var statusField: NSTextField!
+	@IBOutlet weak var verifiedCountField: NSTextField!
+	@IBOutlet weak var versionField: NSTextField!
 	@IBOutlet weak var scrollViewCredits: NSScrollView!
 	@IBOutlet weak var scrollViewLicense: NSScrollView!
 	@IBOutlet weak var viewChecksum: NSView!
 	@IBOutlet weak var windowAbout: NSWindow!
 	@IBOutlet weak var windowMain: NSWindow!
 	
-	@IBOutlet weak var tableViewFileList: NSTableView!
+	@IBOutlet weak var tableViewFileList: STableView!
 	
 	var textViewCredits: NSTextView {
 		return scrollViewCredits.contentView.documentView as! NSTextView
@@ -69,13 +90,13 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		setupToolbar()
 		
 		// selecting items in our table view and pressing the delete key
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "removeSelectedRecords:", name: "RM_RECORD_FROM_LIST", object: nil)
+		NSNotificationCenter.defaultCenter().addObserver(self, selector: "removeSelectedRecords:", name: kRemoveRecordFromList, object: nil)
 		
 		// register for drag and drop on the table view
 		tableViewFileList.registerForDraggedTypes([NSFilenamesPboardType])
 		
 		// make the window pertee and show it
-		button_stop?.enabled = false
+		buttonStop?.enabled = false
 		updateUI()
 		
 		windowMain.center()
@@ -198,12 +219,12 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 			textViewLicense.string = "License file not found!"
 		}
 		
-		NSApp.beginSheet(panel_license, modalForWindow: windowAbout, modalDelegate: nil, didEndSelector: nil, contextInfo: nil)
+		NSApp.beginSheet(licensePanel, modalForWindow: windowAbout, modalDelegate: nil, didEndSelector: nil, contextInfo: nil)
 	}
 	
 	@IBAction func closeLicense(sender: AnyObject?) {
-		panel_license.orderOut(sender)
-		NSApp.endSheet(panel_license, returnCode: 0)
+		licensePanel.orderOut(sender)
+		NSApp.endSheet(licensePanel, returnCode: 0)
 	}
 	
 	@IBAction func aboutIconClicked(sender: AnyObject?) {
@@ -221,10 +242,10 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		textViewCredits.textStorage?.setAttributedString(creditsString)
 		
 		// Version
-		textField_version.stringValue = applicationVersion
+		versionField.stringValue = applicationVersion
 		
 		// die you little blue bastard for attempting to thwart my easter egg
-		button_easterEgg.focusRingType = .None
+		easterEggButton.focusRingType = .None
 		
 		// Center n show eet
 		windowAbout.center()
@@ -312,7 +333,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 				}
 				
 				let newEntry = FileEntry(path: file)
-				queueEntry(newEntry, algorithm: SPCryptoAlgorithm(rawValue: Int32(popUpButton_checksum.indexOfSelectedItem)) ?? .CRC)
+				queueEntry(newEntry, algorithm: SPCryptoAlgorithm(rawValue: Int32(checksumPopUp.indexOfSelectedItem)) ?? .CRC)
 			}
 		}
 	}
@@ -342,10 +363,10 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 	
 	/// updates the general UI, i.e the toolbar items, and reloads the data for our tableview
 	private func updateUI() {
-		button_recalculate?.enabled = records.count > 0
-		button_remove?.enabled = records.count > 0
-		button_save?.enabled = records.count > 0
-		textField_fileCount.integerValue = records.count
+		buttonRecalculate?.enabled = records.count > 0
+		buttonRemove?.enabled = records.count > 0
+		buttonSave?.enabled = records.count > 0
+		fileCountField.integerValue = records.count
 
 		// other 'stats' .. may be a bit sloppy
 		var error_count = 0; var failure_count = 0; var verified_count = 0
@@ -377,30 +398,30 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 			}
 		}
 		
-		textField_errorCount.integerValue = error_count
-		textField_failedCount.integerValue = failure_count
-		textField_verifiedCount.integerValue = verified_count
+		errorCountField.integerValue = error_count
+		failedCountField.integerValue = failure_count
+		verifiedCountField.integerValue = verified_count
 		
 		tableViewFileList.reloadData()
 		tableViewFileList.scrollRowToVisible(records.count - 1)
 	}
 	
 	private func startProcessingQueue() {
-		progressBar_progress.indeterminate = true
-		progressBar_progress.hidden = false
-		progressBar_progress.startAnimation(self)
-		button_stop?.enabled = true
-		popUpButton_checksum.enabled = false
-		textField_status.hidden = false
+		progressBar.indeterminate = true
+		progressBar.hidden = false
+		progressBar.startAnimation(self)
+		buttonStop?.enabled = true
+		checksumPopUp.enabled = false
+		statusField.hidden = false
 	}
 	
 	private func stopProcessingQueue() {
-		progressBar_progress.stopAnimation(self)
-		progressBar_progress.hidden = true
-		button_stop?.enabled = false
-		popUpButton_checksum.enabled = true
-		textField_status.hidden = true
-		textField_status.stringValue = ""
+		progressBar.stopAnimation(self)
+		progressBar.hidden = true
+		buttonStop?.enabled = false
+		checksumPopUp.enabled = true
+		statusField.hidden = true
+		statusField.stringValue = ""
 	}
 	
 	/// Called periodically for updating the UI
@@ -412,7 +433,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		}
 		
 		self.updateUI()
-		textField_status.integerValue = queue.operationCount
+		statusField.integerValue = queue.operationCount
 	}
 
 	// MARK: TableView delegate

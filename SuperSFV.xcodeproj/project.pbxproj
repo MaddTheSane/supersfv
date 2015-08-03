@@ -10,10 +10,9 @@
 		4E283F5F0AB657F9007B4BFC /* SuperSFVHelp in Resources */ = {isa = PBXBuildFile; fileRef = 4E283F5C0AB657F9007B4BFC /* SuperSFVHelp */; };
 		4E4AC9570AB7E6130046762E /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD1B1A3174A70081E21E /* Credits.rtf */; };
 		4E4AC9580AB7E6130046762E /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E4AC9560AB7E6130046762E /* License.txt */; };
-		4E593D6E0AB3465E0092AE43 /* SPTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E593D6D0AB3465E0092AE43 /* SPTableView.m */; };
 		4E593E6B0AB371450092AE43 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E593E6A0AB371450092AE43 /* crc32.c */; };
-		4E971A930AB0FCF0005F28B2 /* SPSuperSFV.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */; };
 		5542CD121A3173350081E21E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5542CD111A3173350081E21E /* Images.xcassets */; };
+		55DC610B1B701D9B00358E7C /* SPTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55DC610A1B701D9B00358E7C /* SPTableView.swift */; };
 		55E2DE881B6DECB3006EE5C7 /* SPSuperSFV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E2DE871B6DECB3006EE5C7 /* SPSuperSFV.swift */; };
 		55EAFC9B1A318722002E6E2E /* FileEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EAFC9A1A318722002E6E2E /* FileEntry.swift */; };
 		6D9FD368109DD83600729576 /* SPIntegrityOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D9FD367109DD83600729576 /* SPIntegrityOperation.m */; };
@@ -42,8 +41,9 @@
 		4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPSuperSFV.m; sourceTree = "<group>"; usesTabs = 1; };
 		5542CD111A3173350081E21E /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		5542CD1A1A3174A70081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		55DC610A1B701D9B00358E7C /* SPTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SPTableView.swift; sourceTree = "<group>"; };
 		55E2DE871B6DECB3006EE5C7 /* SPSuperSFV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SPSuperSFV.swift; sourceTree = "<group>"; };
-		55EAFC991A318721002E6E2E /* SuperSFV-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SuperSFV-Bridging-Header.h"; sourceTree = "<group>"; };
+		55EAFC991A318721002E6E2E /* SuperSFV-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "SuperSFV-Bridging-Header.h"; path = "Classes/SuperSFV-Bridging-Header.h"; sourceTree = "<group>"; };
 		55EAFC9A1A318722002E6E2E /* FileEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEntry.swift; sourceTree = "<group>"; };
 		6D9FD366109DD83600729576 /* SPIntegrityOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPIntegrityOperation.h; sourceTree = "<group>"; usesTabs = 0; };
 		6D9FD367109DD83600729576 /* SPIntegrityOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPIntegrityOperation.m; sourceTree = "<group>"; usesTabs = 0; };
@@ -66,7 +66,6 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				55EAFC991A318721002E6E2E /* SuperSFV-Bridging-Header.h */,
 				4E971A910AB0FCF0005F28B2 /* SPSuperSFV.h */,
 				4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */,
 				4E593D6C0AB3465E0092AE43 /* SPTableView.h */,
@@ -121,6 +120,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				55EAFC991A318721002E6E2E /* SuperSFV-Bridging-Header.h */,
 				4E593E690AB371450092AE43 /* crc32.h */,
 				4E593E6A0AB371450092AE43 /* crc32.c */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
@@ -156,6 +156,7 @@
 			children = (
 				55EAFC9A1A318722002E6E2E /* FileEntry.swift */,
 				55E2DE871B6DECB3006EE5C7 /* SPSuperSFV.swift */,
+				55DC610A1B701D9B00358E7C /* SPTableView.swift */,
 			);
 			name = Swift;
 			sourceTree = "<group>";
@@ -234,8 +235,7 @@
 			files = (
 				55E2DE881B6DECB3006EE5C7 /* SPSuperSFV.swift in Sources */,
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
-				4E971A930AB0FCF0005F28B2 /* SPSuperSFV.m in Sources */,
-				4E593D6E0AB3465E0092AE43 /* SPTableView.m in Sources */,
+				55DC610B1B701D9B00358E7C /* SPTableView.swift in Sources */,
 				55EAFC9B1A318722002E6E2E /* FileEntry.swift in Sources */,
 				4E593E6B0AB371450092AE43 /* crc32.c in Sources */,
 				6D9FD368109DD83600729576 /* SPIntegrityOperation.m in Sources */,

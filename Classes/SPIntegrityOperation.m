@@ -58,10 +58,6 @@
         NSString *file = fileEntry.filePath;
         NSString *expectedHash = fileEntry.expected;
 
-        NSFileManager *dm = [NSFileManager defaultManager];
-        NSDictionary *fileAttributes = [dm attributesOfItemAtPath:file error:NULL];
-
-
         if (cryptoAlgorithm == SPCryptoAlgorithmUnknown) {
             switch ([expectedHash length]) {
                 case 8:
@@ -117,27 +113,32 @@
                 break;
         }
 		
-		NSData *fileData;
-		
-        while ((fileData = [fileHandle readDataOfLength:65536]).length > 0) {
-            if ([self isCancelled])
-                break;
+        @autoreleasepool {
+            NSData *fileData;
             
-            switch (algorithm) {
-                case SPCryptoAlgorithmCRC:
-                    crc = crc32(crc, fileData.bytes, fileData.length);
+            while ((fileData = [fileHandle readDataOfLength:65536]).length > 0) {
+                if ([self isCancelled])
                     break;
-                case SPCryptoAlgorithmMD5:
-                    CC_MD5_Update(&md5_ctx, fileData.bytes, (CC_LONG)fileData.length);
-                    break;
-                case SPCryptoAlgorithmSHA1:
-                    CC_SHA1_Update(&sha_ctx, fileData.bytes, (CC_LONG)fileData.length);
-                    break;
+                
+                switch (algorithm) {
+                    case SPCryptoAlgorithmCRC:
+                        crc = crc32(crc, fileData.bytes, fileData.length);
+                        break;
+                    case SPCryptoAlgorithmMD5:
+                        CC_MD5_Update(&md5_ctx, fileData.bytes, (CC_LONG)fileData.length);
+                        break;
+                    case SPCryptoAlgorithmSHA1:
+                        CC_SHA1_Update(&sha_ctx, fileData.bytes, (CC_LONG)fileData.length);
+                        break;
+                        
+                    default:
+                        NSLog(@"We shouldn't get here...");
+                        break;
+                }
             }
+            fileHandle = nil;
+            NSLog(@"Finished with file %@", fileEntry.filePath);
         }
-		fileHandle = nil;
-		NSLog(@"Finished with file %@", fileEntry.filePath);
-        
 
         if ([self isCancelled])
             return;
