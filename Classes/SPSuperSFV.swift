@@ -42,6 +42,7 @@ private var applicationVersion: String {
 	return version ?? ""
 }
 
+@NSApplicationMain
 class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate {
 	@IBOutlet weak var buttonAdd: NSButton?
 	@IBOutlet weak var buttonCloseLicense: NSButton!

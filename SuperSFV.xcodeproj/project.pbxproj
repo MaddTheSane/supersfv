@@ -18,7 +18,6 @@
 		6D9FD368109DD83600729576 /* SPIntegrityOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D9FD367109DD83600729576 /* SPIntegrityOperation.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.xib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
-		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
@@ -234,7 +233,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				55E2DE881B6DECB3006EE5C7 /* SPSuperSFV.swift in Sources */,
-				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				55DC610B1B701D9B00358E7C /* SPTableView.swift in Sources */,
 				55EAFC9B1A318722002E6E2E /* FileEntry.swift in Sources */,
 				4E593E6B0AB371450092AE43 /* crc32.c in Sources */,

@@ -21,6 +21,8 @@
 
 @class FileEntry;
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef NS_ENUM(int, SPCryptoAlgorithm) {
 	SPCryptoAlgorithmUnknown = -1,
 	SPCryptoAlgorithmCRC = 0,
@@ -33,11 +35,12 @@ typedef NS_ENUM(int, SPCryptoAlgorithm) {
 	FileEntry *fileEntry;
     NSObject *target;
     SPCryptoAlgorithm cryptoAlgorithm;
-    NSString *hash;
 }
 
-@property (readonly) NSString *hashString;
+@property (readonly, copy, nullable) NSString *hashString;
 
 - (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object;
-- (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
+- (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm NS_DESIGNATED_INITIALIZER;
 @end
+
+NS_ASSUME_NONNULL_END
