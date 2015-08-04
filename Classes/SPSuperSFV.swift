@@ -160,7 +160,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 			let alert = NSAlert()
 			alert.messageText = "Confirm Removal"
 			alert.informativeText = "You sure you want to ditch all of the entries? They're so cute!"
-			alert.addButtonWithTitle("Removal All")
+			alert.addButtonWithTitle("Remove All")
 			alert.addButtonWithTitle("Cancel")
 			
 			alert.beginSheetModalForWindow(windowMain, completionHandler: { (returnCode) -> Void in
@@ -261,21 +261,19 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		let contents = (try! NSString(contentsOfFile: filePath, usedEncoding: nil)).componentsSeparatedByString("\n")
 		for entry1 in contents {
 			var errc = 0 //error count
-			var newPath = ""
-			var hash = ""
 
 			let entry = entry1.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
 			if entry == "" {
 				continue
 			}
-			if entry.characters[entry.characters.startIndex] == ";" {
+			if entry.characters.first == ";" {
 				continue; // skip the line if it's a comment
 			}
 			guard let r = entry.rangeOfCharacterFromSet(NSCharacterSet(charactersInString: " "), options: .BackwardsSearch) else {
 				continue
 			}
-			newPath = filePath.stringByDeletingLastPathComponent.stringByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
-			hash = entry[r.endIndex.successor() ..< entry.endIndex]
+			let newPath = filePath.stringByDeletingLastPathComponent.stringByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
+			let hash = entry[r.endIndex ..< entry.endIndex]
 			
 			let newEntry = FileEntry(path: newPath, expectedHash: hash)
 			
@@ -341,13 +339,8 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 	
 	// MARK: private methods
 	private func queueEntry(entry: FileEntry, algorithm: SPCryptoAlgorithm = .Unknown) {
-		let integrityOp: SPIntegrityOperation
+		let integrityOp = SPIntegrityOperation(fileEntry: entry, target: self, algorithm: algorithm)
 		
-		if (algorithm == .Unknown) {
-			integrityOp = SPIntegrityOperation(fileEntry: entry, target: self)
-		} else {
-			integrityOp = SPIntegrityOperation(fileEntry: entry, target: self, algorithm: algorithm);
-		}
 		queue.addOperation(integrityOp)
 		
 		/* TODO: Set image indicating "in progress" */

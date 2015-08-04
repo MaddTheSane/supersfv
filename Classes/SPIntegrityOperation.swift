@@ -29,7 +29,6 @@ class SPIntegrityOperation: NSOperation {
 		super.init()
 	}
 
-	
 	override func main() {
 		autoreleasepool() {
 			print("Running for file \(fileEntry.filePath)")
@@ -78,7 +77,7 @@ class SPIntegrityOperation: NSOperation {
 				
 			case .SHA1:
 				CC_SHA1_Init(&sha_ctx);
-
+				
 			default:
 				break
 			}
@@ -90,19 +89,19 @@ class SPIntegrityOperation: NSOperation {
 						break
 					}
 					
-				switch algorithm {
-				case .CRC:
-					crc = uulib_crc32(crc, UnsafePointer<UInt8>(fileData.bytes), fileData.length)
-					
-				case .MD5:
-					CC_MD5_Update(&md5_ctx, fileData.bytes, CC_LONG(fileData.length))
-					
-				case .SHA1:
-					CC_SHA1_Update(&sha_ctx, fileData.bytes, CC_LONG(fileData.length))
-					
-				default:
-					break
-
+					switch algorithm {
+					case .CRC:
+						crc = uulib_crc32(crc, UnsafePointer<UInt8>(fileData.bytes), fileData.length)
+						
+					case .MD5:
+						CC_MD5_Update(&md5_ctx, fileData.bytes, CC_LONG(fileData.length))
+						
+					case .SHA1:
+						CC_SHA1_Update(&sha_ctx, fileData.bytes, CC_LONG(fileData.length))
+						
+					default:
+						break
+						
 					}
 					fileData = fileHandle!.readDataOfLength(65536)
 				} while fileData.length > 0
@@ -118,7 +117,7 @@ class SPIntegrityOperation: NSOperation {
 			if algorithm == .CRC {
 				hashString = String(format: "%08x", crc).uppercaseString
 			} else {
-				var dgst = [UInt8](count: algorithm == .MD5 ? 32 : 40, repeatedValue: 0)
+				var dgst = [UInt8](count: algorithm == .MD5 ? Int(CC_MD5_DIGEST_LENGTH) : Int(CC_SHA1_DIGEST_LENGTH), repeatedValue: 0)
 				switch algorithm {
 				case .SHA1:
 					CC_SHA1_Final(&dgst, &sha_ctx)
