@@ -30,7 +30,7 @@ import AppKit.NSImage
 
 
 class FileEntry : NSObject {
-	enum FileStatus : Int {
+	@objc enum FileStatus : Int {
 		case Unknown = 0
 		case Checking
 		case Valid
@@ -38,6 +38,7 @@ class FileEntry : NSObject {
 		case FileNotFound
 		case UnknownChecksum = -1
 	}
+	
 	class func imageForStatus(status: FileStatus) -> NSImage? {
 		switch (status) {
 		case .Checking:

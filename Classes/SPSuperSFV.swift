@@ -333,14 +333,14 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 				}
 				
 				let newEntry = FileEntry(path: file)
-				queueEntry(newEntry, algorithm: IntegrityOperation.CryptoAlgorithm(rawValue: Int32(checksumPopUp.indexOfSelectedItem)) ?? .CRC)
+				queueEntry(newEntry, algorithm: SPCryptoAlgorithm(rawValue: Int32(checksumPopUp.indexOfSelectedItem)) ?? .CRC)
 			}
 		}
 	}
 	
 	// MARK: private methods
-	private func queueEntry(entry: FileEntry, algorithm: IntegrityOperation.CryptoAlgorithm = .Unknown) {
-		let integrityOp = IntegrityOperation(fileEntry: entry, target: self, algorithm: algorithm)
+	private func queueEntry(entry: FileEntry, algorithm: SPCryptoAlgorithm = .Unknown) {
+		let integrityOp = SPIntegrityOperation(fileEntry: entry, target: self, algorithm: algorithm)
 		
 		queue.addOperation(integrityOp)
 		
