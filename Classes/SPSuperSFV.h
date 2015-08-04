@@ -71,6 +71,4 @@
 
 - (void)sortWithDescriptor:(NSSortDescriptor*)descriptor;
 
-- (void)setup_toolbar;
-
 @end

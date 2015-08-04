@@ -107,7 +107,6 @@
                 
             case SPCryptoAlgorithmSHA1:
                 CC_SHA1_Init(&hashCtx.sha_ctx);
-                
                 break;
                 
             default:
@@ -164,7 +163,7 @@
             }
             
             for (int i = 0; i < ((algorithm == SPCryptoAlgorithmMD5)?16:20); i++)
-                hash = [[[self hashString] stringByAppendingFormat:@"%02x", dgst[i]] uppercaseString];
+                hash = [[hash stringByAppendingFormat:@"%02x", dgst[i]] uppercaseString];
             
             free(dgst);
         }

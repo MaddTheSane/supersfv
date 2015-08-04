@@ -36,6 +36,7 @@
 - (void)updateUI;
 - (void)startProcessingQueue;
 - (void)stopProcessingQueue;
+- (void)setup_toolbar;
 @end
 
 @implementation SPSuperSFV
@@ -160,7 +161,7 @@
         NSAlert *alert = [NSAlert new];
         alert.messageText = @"Confirm Removal";
         alert.informativeText = @"You sure you want to ditch all of the entries? They're so cute!";
-        [alert addButtonWithTitle:@"Removal All"];
+        [alert addButtonWithTitle:@"Remove All"];
         [alert addButtonWithTitle:@"Cancel"];
         
         [alert beginSheetModalForWindow:window_main completionHandler:^(NSModalResponse returnCode) {
@@ -374,13 +375,19 @@
 				continue;
 				break;
 				
+			case SPFileStatusValid:
+				verified_count++;
+				continue;
+				break;
+				
 			default:
 				break;
 		}
 
-		if (entry.result == nil || [entry.result isEqualToString:@""] || entry.status == SPFileStatusValid) {
+		if (entry.result == nil || [entry.result isEqualToString:@""]) {
 			continue;
 		}
+		
         if ([entry.expected compare:entry.result options:NSCaseInsensitiveSearch] != NSOrderedSame) {
 			entry.status = SPFileStatusInvalid;
             failure_count++;
