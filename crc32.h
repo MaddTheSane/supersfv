@@ -3,14 +3,6 @@
 
 #include <stdint.h>
 
-#ifndef _ANSI_ARGS_
-#ifdef PROTOTYPES
-#define _ANSI_ARGS_(c)	c
-#else
-#define _ANSI_ARGS_(c)	()
-#endif
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,7 +16,7 @@ typedef uint32_t crc32_t;
 
 #define crc32 uulib_crc32
 
-__private_extern crc32_t crc32 _ANSI_ARGS_((crc32_t crc, const unsigned char *buf, size_t len));
+__private_extern crc32_t crc32(crc32_t crc, const unsigned char *buf, size_t len);
 /*
      Update a running crc with the bytes buf[0..len-1] and return the updated
    crc. If buf is NULL, this function returns the required initial value
