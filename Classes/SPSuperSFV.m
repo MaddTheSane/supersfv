@@ -19,6 +19,7 @@
 
 #import "SPSuperSFV.h"
 #import "SPFileEntry.h"
+
 #import "SPIntegrityOperation.h"
 
 #define SuperSFVToolbarIdentifier    @"SuperSFV Toolbar Identifier"
@@ -35,6 +36,7 @@
 - (void)updateUI;
 - (void)startProcessingQueue;
 - (void)stopProcessingQueue;
+- (void)setup_toolbar;
 @end
 
 @implementation SPSuperSFV
@@ -128,7 +130,7 @@
     [oPanel setCanChooseFiles:YES];
     [oPanel setCanChooseDirectories:YES];
     [oPanel beginSheetModalForWindow:window_main completionHandler:^(NSInteger result) {
-        if (result == NSOKButton) {
+        if (result == NSModalResponseOK) {
             NSArray *URLs = [oPanel URLs];
             NSMutableArray *paths = [[NSMutableArray alloc] initWithCapacity:[URLs count]];
             for (NSURL *url in URLs) {
@@ -155,26 +157,30 @@
 
 - (IBAction)removeClicked:(id)sender
 {
-    if ((![tableView_fileList numberOfSelectedRows]) && ([records count] > 0))
-        NSBeginAlertSheet(@"Confirm Removal", @"Removal All", @"Cancel", nil, window_main, self,
-                          @selector(didEndRemoveAllSheet:returnCode:contextInfo:),
-                          nil, nil, @"You sure you want to ditch all of the entries? They're so cute!");
-    else
+    if ((![tableView_fileList numberOfSelectedRows]) && ([records count] > 0)) {
+        NSAlert *alert = [NSAlert new];
+        alert.messageText = @"Confirm Removal";
+        alert.informativeText = @"You sure you want to ditch all of the entries? They're so cute!";
+        [alert addButtonWithTitle:@"Remove All"];
+        [alert addButtonWithTitle:@"Cancel"];
+        
+        [alert beginSheetModalForWindow:window_main completionHandler:^(NSModalResponse returnCode) {
+            if (returnCode == NSAlertFirstButtonReturn) {
+                [records removeAllObjects];
+                [self updateUI];
+            }
+        }];
+    } else {
         [self removeSelectedRecords:nil];
-}
-
-- (void)didEndRemoveAllSheet:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-    if (returnCode == NSOKButton) {
-        [records removeAllObjects];
-        [self updateUI];
     }
 }
 
 - (IBAction)saveClicked:(id)sender
 {
-    if (![records count])
+    if (![records count]) {
+        NSBeep();
         return;
+    }
 
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     [sPanel setPrompt:@"Save"];
@@ -182,7 +188,7 @@
     sPanel.allowedFileTypes = @[@"sfv"];
     
     [sPanel beginSheetModalForWindow:window_main completionHandler:^(NSInteger result) {
-        if (result == NSOKButton) {
+        if (result == NSModalResponseOK) {
             if ([records count]) {
                 // shameless plug to start out with
                 NSString *output = [NSString stringWithFormat:@"; Created using SuperSFV v%@ on Mac OS X", [self _applicationVersion]];
@@ -190,7 +196,7 @@
                 for (SPFileEntry *entry in records) {
                     if ((![entry.result isEqualToString:@"Missing"])
                         && (![entry.result isEqualToString:@""])) {
-                        
+						
                         output = [output stringByAppendingFormat:@"\n%@ %@",
                                   [entry.filePath lastPathComponent],
                                   entry.result];
@@ -369,13 +375,19 @@
 				continue;
 				break;
 				
+			case SPFileStatusValid:
+				verified_count++;
+				continue;
+				break;
+				
 			default:
 				break;
 		}
 
-		if (entry.result == nil || [entry.result isEqualToString:@""] || entry.status == SPFileStatusValid) {
+		if (entry.result == nil || [entry.result isEqualToString:@""]) {
 			continue;
 		}
+		
         if ([entry.expected compare:entry.result options:NSCaseInsensitiveSearch] != NSOrderedSame) {
 			entry.status = SPFileStatusInvalid;
             failure_count++;
@@ -617,7 +629,7 @@
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)flag
 {
 
-    NSToolbarItem *toolbarItem = nil;
+    NSToolbarItem *toolbarItem;
 
     if ([itemIdent isEqual: AddToolbarIdentifier]) {
         

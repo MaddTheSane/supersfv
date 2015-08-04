@@ -20,6 +20,8 @@
 #import <Cocoa/Cocoa.h>
 #import "SPFileEntry.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef NS_ENUM(int, SPCryptoAlgorithm) {
 	SPCryptoAlgorithmUnknown = -1,
 	SPCryptoAlgorithmCRC = 0,
@@ -35,8 +37,10 @@ typedef NS_ENUM(int, SPCryptoAlgorithm) {
     NSString *hash;
 }
 
-@property (readonly) NSString *hash;
+@property (readonly, copy, nullable) NSString *hashString;
 
 - (instancetype)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object;
 - (instancetype)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm;
 @end
+
+NS_ASSUME_NONNULL_END

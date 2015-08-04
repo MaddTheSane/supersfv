@@ -19,6 +19,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, SPFileStatus) {
 	SPFileStatusUnknown = 0,
@@ -30,7 +31,7 @@ typedef NS_ENUM(NSInteger, SPFileStatus) {
 };
 
 @interface SPFileEntry : NSObject
-+ (NSImage*)imageForStatus:(SPFileStatus)status;
++ (nullable NSImage*)imageForStatus:(SPFileStatus)status;
 
 @property SPFileStatus status;
 @property (readonly, copy) NSString *filePath;
@@ -38,6 +39,8 @@ typedef NS_ENUM(NSInteger, SPFileStatus) {
 @property (copy) NSString *result;
 
 - (instancetype)initWithPath:(NSString*)path;
-- (instancetype)initWithPath:(NSString*)path expectedHash:(NSString*)expected NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithPath:(NSString*)path expectedHash:(null_unspecified NSString*)expected NS_DESIGNATED_INITIALIZER;
 
 @end
+
+NS_ASSUME_NONNULL_END

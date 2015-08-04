@@ -24,7 +24,7 @@
 
 @implementation SPIntegrityOperation
 
-@synthesize hash;
+@synthesize hashString = hash;
 
 - (id)initWithFileEntry:(SPFileEntry *)entry target:(NSObject *)object
 {
@@ -56,10 +56,6 @@
         
         NSString *file = fileEntry.filePath;
         NSString *expectedHash = fileEntry.expected;
-
-        NSFileManager *dm = [NSFileManager defaultManager];
-        NSDictionary *fileAttributes = [dm attributesOfItemAtPath:file error:NULL];
-
 
         if (cryptoAlgorithm == SPCryptoAlgorithmUnknown) {
             switch ([expectedHash length]) {
@@ -94,28 +90,30 @@
 //                                           nil]
 //                            waitUntilDone:YES];
 
-        crc32_t crc;
-        CC_MD5_CTX md5_ctx;
-        CC_SHA1_CTX sha_ctx;
+        union HashCtx_t {
+            crc32_t crc;
+            CC_MD5_CTX md5_ctx;
+            CC_SHA1_CTX sha_ctx;
+        } hashCtx;
         
         switch (algorithm) {
             case SPCryptoAlgorithmCRC:
-                crc = crc32(0L,Z_NULL,0);
+                hashCtx.crc = crc32(0L,Z_NULL,0);
                 break;
                 
             case SPCryptoAlgorithmMD5:
-                CC_MD5_Init(&md5_ctx);
+                CC_MD5_Init(&hashCtx.md5_ctx);
                 break;
                 
             case SPCryptoAlgorithmSHA1:
-                CC_SHA1_Init(&sha_ctx);
-                
+                CC_SHA1_Init(&hashCtx.sha_ctx);
                 break;
                 
             default:
                 break;
         }
 		
+        @autoreleasepool {
 		NSData *fileData;
 		
         while ((fileData = [fileHandle readDataOfLength:65536]).length > 0) {
@@ -124,15 +122,19 @@
             
             switch (algorithm) {
                 case SPCryptoAlgorithmCRC:
-                    crc = crc32(crc, fileData.bytes, fileData.length);
+                    hashCtx.crc = crc32(hashCtx.crc, fileData.bytes, fileData.length);
                     break;
                 case SPCryptoAlgorithmMD5:
-                    CC_MD5_Update(&md5_ctx, fileData.bytes, (CC_LONG)fileData.length);
+                    CC_MD5_Update(&hashCtx.md5_ctx, fileData.bytes, (CC_LONG)fileData.length);
                     break;
                 case SPCryptoAlgorithmSHA1:
-                    CC_SHA1_Update(&sha_ctx, fileData.bytes, (CC_LONG)fileData.length);
+                    CC_SHA1_Update(&hashCtx.sha_ctx, fileData.bytes, (CC_LONG)fileData.length);
+                    break;
+                    
+                default:
                     break;
             }
+        }
         }
 		fileHandle = nil;
 		NSLog(@"Finished with file %@", fileEntry.filePath);
@@ -142,18 +144,18 @@
             return;
         
         if (algorithm == SPCryptoAlgorithmCRC) {
-            hash = [[NSString stringWithFormat:@"%08x", crc] uppercaseString];
+            hash = [[NSString stringWithFormat:@"%08x", hashCtx.crc] uppercaseString];
         } else {
             hash = @"";
             dgst = (uint8_t *) calloc (((algorithm == SPCryptoAlgorithmMD5)?32:40), sizeof(uint8_t));
             
             switch (algorithm) {
                 case SPCryptoAlgorithmSHA1:
-                    CC_SHA1_Final(dgst,&sha_ctx);
+                    CC_SHA1_Final(dgst,&hashCtx.sha_ctx);
                     break;
                     
                 case SPCryptoAlgorithmMD5:
-                    CC_MD5_Final(dgst,&md5_ctx);
+                    CC_MD5_Final(dgst,&hashCtx.md5_ctx);
                     break;
                     
                 default:
@@ -161,7 +163,7 @@
             }
             
             for (int i = 0; i < ((algorithm == SPCryptoAlgorithmMD5)?16:20); i++)
-                hash = [[[self hash] stringByAppendingFormat:@"%02x", dgst[i]] uppercaseString];
+                hash = [[hash stringByAppendingFormat:@"%02x", dgst[i]] uppercaseString];
             
             free(dgst);
         }
