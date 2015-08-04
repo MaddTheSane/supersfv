@@ -28,17 +28,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 import Foundation
 import AppKit.NSImage
 
-@objc enum SPFileStatus : Int {
-	case Unknown = 0
-	case Checking
-	case Valid
-	case Invalid
-	case FileNotFound
-	case UnknownChecksum = -1
-}
 
 class FileEntry : NSObject {
-	class func imageForStatus(status: SPFileStatus) -> NSImage? {
+	enum FileStatus : Int {
+		case Unknown = 0
+		case Checking
+		case Valid
+		case Invalid
+		case FileNotFound
+		case UnknownChecksum = -1
+	}
+	class func imageForStatus(status: FileStatus) -> NSImage? {
 		switch (status) {
 		case .Checking:
 			return NSImage(named: NSImageNameStatusPartiallyAvailable)
@@ -57,7 +57,7 @@ class FileEntry : NSObject {
 		}
 	}
 	
-	var status = SPFileStatus.Unknown
+	var status = FileStatus.Unknown
 	let filePath: String
 	var expected: String
 	var result: String

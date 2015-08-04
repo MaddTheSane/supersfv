@@ -8,20 +8,20 @@
 
 import Cocoa
 
-enum SPCryptoAlgorithm : Int32 {
-	case Unknown = -1
-	case CRC = 0
-	case MD5
-	case SHA1
-}
 
-class SPIntegrityOperation: NSOperation {
+class IntegrityOperation: NSOperation {
+	enum CryptoAlgorithm : Int32 {
+		case Unknown = -1
+		case CRC = 0
+		case MD5
+		case SHA1
+	}
 	private(set) var hashString: String?
 	private var fileEntry: FileEntry
 	private var target: NSObject
-	private var cryptoAlgorithm : SPCryptoAlgorithm
+	private var cryptoAlgorithm : CryptoAlgorithm
 
-	init(fileEntry entry: FileEntry, target object: NSObject, algorithm: SPCryptoAlgorithm = .Unknown) {
+	init(fileEntry entry: FileEntry, target object: NSObject, algorithm: CryptoAlgorithm = .Unknown) {
 		fileEntry = entry
 		target = object
 		cryptoAlgorithm = algorithm
@@ -36,7 +36,7 @@ class SPIntegrityOperation: NSOperation {
 				return
 			}
 			
-			let algorithm: SPCryptoAlgorithm
+			let algorithm: CryptoAlgorithm
 			
 			let file = fileEntry.filePath
 			let expectedHash = fileEntry.expected
