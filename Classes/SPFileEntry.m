@@ -52,7 +52,7 @@
 
 - (instancetype)init
 {
-	self = [self initWithPath:@""];
+	self = [self initWithPath:@"" expectedHash:@""];
 	return nil;
 }
 

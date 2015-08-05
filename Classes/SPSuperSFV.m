@@ -446,13 +446,10 @@
 {
     SPIntegrityOperation *integrityOp;
 
-    if (algorithm == SPCryptoAlgorithmUnknown)
-    {
+    if (algorithm == SPCryptoAlgorithmUnknown) {
         integrityOp = [[SPIntegrityOperation alloc] initWithFileEntry:entry
                                                                target:self];
-    }
-    else
-    {
+    } else {
         integrityOp = [[SPIntegrityOperation alloc] initWithFileEntry:entry
                                                                target:self
                                                             algorithm:algorithm];
@@ -460,19 +457,13 @@
          
     [queue addOperation: integrityOp];
 
-    //NSString *fileName = entry.filePath;
-    //NSString *expectedHash = entry.expected;
-
-    //SPFileEntry *newEntry = [[SPFileEntry alloc] initWithPath:fileName expectedHash:expectedHash];
-
     /* TODO: Set image indicating "in progress" */
     entry.status = SPFileStatusChecking;
     
     [records addObject:entry];
     
     /* If this was the first operation added to the queue */
-    if ([queue operationCount] == 1)
-    {
+    if ([queue operationCount] == 1) {
         [self startProcessingQueue];
         updateProgressTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                                 target:self
@@ -611,7 +602,6 @@
 	[self updateUI];
 }
 
-
 #pragma mark Toolbar
 - (void)setup_toolbar
 {
@@ -628,11 +618,9 @@
 
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)flag
 {
-
     NSToolbarItem *toolbarItem;
 
     if ([itemIdent isEqual: AddToolbarIdentifier]) {
-        
         toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
 
         [toolbarItem setLabel: @"Add"];
@@ -644,7 +632,6 @@
         [toolbarItem setAutovalidates: NO];
 
     } else if ([itemIdent isEqual: RemoveToolbarIdentifier]) {
-        
         toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
         
         [toolbarItem setLabel: @"Remove"];
@@ -656,7 +643,6 @@
         [toolbarItem setAutovalidates: NO];
 
     } else if ([itemIdent isEqual: RecalculateToolbarIdentifier]) {
-        
         toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
 
         [toolbarItem setLabel: @"Recalculate"];
@@ -668,7 +654,6 @@
         [toolbarItem setAutovalidates: NO];
 
     } else if ([itemIdent isEqual: StopToolbarIdentifier]) {
-        
         toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
         
         [toolbarItem setLabel: @"Stop"];
@@ -680,7 +665,6 @@
         [toolbarItem setAutovalidates: NO];
 
     } else if ([itemIdent isEqual: SaveToolbarIdentifier]) {
-        
         toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
 
         [toolbarItem setLabel: @"Save"];
@@ -692,7 +676,6 @@
         [toolbarItem setAutovalidates: NO];
 
     } else if ([itemIdent isEqual: ChecksumToolbarIdentifier]) {
-        
         toolbarItem = [[NSToolbarItem alloc] initWithItemIdentifier: itemIdent];
 
         [toolbarItem setLabel: @"Checksum"];

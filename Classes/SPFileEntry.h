@@ -39,7 +39,7 @@ typedef NS_ENUM(NSInteger, SPFileStatus) {
 @property (copy) NSString *result;
 
 - (instancetype)initWithPath:(NSString*)path;
-- (instancetype)initWithPath:(NSString*)path expectedHash:(null_unspecified NSString*)expected NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithPath:(NSString*)path expectedHash:(NSString*)expected NS_DESIGNATED_INITIALIZER;
 
 @end
 
