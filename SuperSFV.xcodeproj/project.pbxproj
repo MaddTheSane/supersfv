@@ -32,8 +32,6 @@
 		32CA4F630368D1EE00C91783 /* SuperSFV_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SuperSFV_Prefix.pch; sourceTree = "<group>"; };
 		4E283F5C0AB657F9007B4BFC /* SuperSFVHelp */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SuperSFVHelp; sourceTree = "<group>"; };
 		4E4AC9560AB7E6130046762E /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = SOURCE_ROOT; };
-		4E593D6C0AB3465E0092AE43 /* SPTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTableView.h; sourceTree = "<group>"; };
-		4E593D6D0AB3465E0092AE43 /* SPTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTableView.m; sourceTree = "<group>"; };
 		4E593E690AB371450092AE43 /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
 		4E593E6A0AB371450092AE43 /* crc32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32.c; sourceTree = "<group>"; };
 		4E971A910AB0FCF0005F28B2 /* SPSuperSFV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPSuperSFV.h; sourceTree = "<group>"; usesTabs = 1; };
@@ -68,8 +66,6 @@
 			children = (
 				4E971A910AB0FCF0005F28B2 /* SPSuperSFV.h */,
 				4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */,
-				4E593D6C0AB3465E0092AE43 /* SPTableView.h */,
-				4E593D6D0AB3465E0092AE43 /* SPTableView.m */,
 				6D9FD366109DD83600729576 /* SPIntegrityOperation.h */,
 				6D9FD367109DD83600729576 /* SPIntegrityOperation.m */,
 				55A1EB9C1A31E4D200CB1E49 /* Swift */,

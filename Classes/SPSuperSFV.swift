@@ -68,7 +68,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 	@IBOutlet weak var windowAbout: NSWindow!
 	@IBOutlet weak var windowMain: NSWindow!
 	
-	@IBOutlet weak var tableViewFileList: STableView!
+	@IBOutlet weak var tableViewFileList: SPTableView!
 	
 	var textViewCredits: NSTextView {
 		return scrollViewCredits.contentView.documentView as! NSTextView

@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 import Cocoa
 
-class STableView: NSTableView {
+class SPTableView: NSTableView {
 	override func keyDown(theEvent: NSEvent) {
 		switch theEvent.keyCode {
 		case 51:
