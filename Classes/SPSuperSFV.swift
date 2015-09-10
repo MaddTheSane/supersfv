@@ -80,6 +80,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 	private let queue = NSOperationQueue()
 	private var records = [FileEntry]()
 	private var updateProgressTimer: NSTimer?
+	private var baseURL = NSURL(fileURLWithPath: NSHomeDirectory())
 	
 	override init() {
 		var dictionary = [String: AnyObject]()
@@ -217,7 +218,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		if let licenseURL = NSBundle.mainBundle().URLForResource("License", withExtension: "txt") {
 			textViewLicense.string = (try! NSString(contentsOfURL: licenseURL, usedEncoding: nil)) as String
 		} else {
-			//rtf support in the future?
+			//TODO: rtf support in the future?
 			textViewLicense.string = "License file not found!"
 		}
 		
@@ -258,7 +259,63 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		NSWorkspace.sharedWorkspace().openURL(NSURL(string: "mailto:reikonmusha@gmail.com")!)
 	}
 	
-	func parseSFVFile(filePath: String) {
+	@objc(parseSFVFileAtFileURL:) func parseSFVFile(fileURL: NSURL) {
+		let thisBaseURL = fileURL.URLByDeletingLastPathComponent!
+		baseURL = thisBaseURL
+		do {
+			let rawContents = try NSString(contentsOfURL: fileURL, usedEncoding: nil)
+			let contents = rawContents.componentsSeparatedByCharactersInSet(NSCharacterSet.newlineCharacterSet())
+			for entry1 in contents {
+				var errc = 0 //error count
+				
+				let entry = entry1.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+				if entry == "" {
+					continue
+				}
+				if entry.characters.first == ";" {
+					continue; // skip the line if it's a comment
+				}
+				guard let r = entry.rangeOfCharacterFromSet(NSCharacterSet(charactersInString: " "), options: .BackwardsSearch) else {
+					continue
+				}
+				let newURL = NSURL(string: entry[entry.startIndex..<r.startIndex], relativeToURL: fileURL)!
+				//let newURL = thisBaseURL.URLByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
+				let hash = entry[r.endIndex ..< entry.endIndex]
+				
+				let newEntry = FileEntry(fileURL: newURL, expectedHash: hash)
+				
+				// file doesn't exist...
+				if !newURL.checkResourceIsReachableAndReturnError(nil) {
+					newEntry.status = .FileNotFound
+					newEntry.result = "Missing"
+					errc++
+				}
+				
+				// length doesn't match CRC32, MD5 or SHA-1 respectively
+				if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
+					newEntry.status = .UnknownChecksum;
+					newEntry.expected = "Unknown";
+					errc++;
+				}
+				
+				// if theres an error, then we don't need to continue with this entry
+				if errc != 0 {
+					records.append(newEntry)
+					updateUI()
+					continue;
+				}
+				// assume it'll fail until proven otherwise
+				newEntry.status = .Invalid;
+				
+				queueEntry(newEntry)
+			}
+		} catch _ {
+			NSBeep()
+		}
+		
+	}
+	
+	@objc(parseSFVFileAtFilePath:) func parseSFVFile(filePath: String) {
 		let contents = (try! NSString(contentsOfFile: filePath, usedEncoding: nil)).componentsSeparatedByString("\n")
 		for entry1 in contents {
 			var errc = 0 //error count
@@ -305,38 +362,46 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		}
 	}
 	
-	/// process files dropped on the tableview, icon, or are manually opened
-	func processFiles(fileNames: [String]) {
+	func processFileURLs(fileURLs: [NSURL]) {
 		let fm = NSFileManager()
-		var isDir: ObjCBool = false
 
-		for file in fileNames {
-			let lastPathComp = (file as NSString).lastPathComponent
-			if lastPathComp.characters[lastPathComp.characters.startIndex] == "." {
-				continue // ignore hidden files
+		for url in fileURLs {
+			if !url.fileURL {
+				continue
+			}
+			if let lastPathComp = url.lastPathComponent {
+				if lastPathComp.characters[lastPathComp.characters.startIndex] == "." {
+					continue // ignore hidden files
+				}
+			}
+			if let pathExt = url.pathExtension where pathExt.lowercaseString == "sfv" {
+				let isDirDict = try? url.resourceValuesForKeys([NSURLFileResourceTypeDirectory])
+				if let aDir = isDirDict?[NSURLFileResourceTypeDirectory] as? Bool where !aDir {
+					parseSFVFile(url)
+					continue
+				}
 			}
 			
-			if (file as NSString).pathExtension.lowercaseString == "sfv" {
-				if fm.fileExistsAtPath(file, isDirectory: &isDir) && !isDir {
-					parseSFVFile(file)
-					continue
-				}
-			} else {
-				// recurse directories (I didn't feel like using NSDirectoryEnumerator)
-				if fm.fileExistsAtPath(file, isDirectory: &isDir) && isDir {
-					do {
-						let dirContents = try fm.contentsOfDirectoryAtPath(file)
-						processFiles(dirContents.map({ return (file as NSString).stringByAppendingPathComponent($0) }))
-					} catch _ {
-						
-					}
-					continue
-				}
-				
-				let newEntry = FileEntry(path: file)
-				queueEntry(newEntry, algorithm: SPCryptoAlgorithm(rawValue: Int32(checksumPopUp.indexOfSelectedItem)) ?? .CRC)
+			let isDirDict = try? url.resourceValuesForKeys([NSURLFileResourceTypeDirectory])
+			if let aDir = isDirDict?[NSURLFileResourceTypeDirectory] as? Bool where aDir {
+				do {
+					let dirContents = try fm.contentsOfDirectoryAtURL(url, includingPropertiesForKeys: [], options: [])
+					processFileURLs(dirContents)
+				} catch _ {}
+				//parseSFVFile(url)
+				continue
 			}
+			let newEntry = FileEntry(fileURL: url)
+			queueEntry(newEntry, algorithm: SPCryptoAlgorithm(rawValue: Int32(checksumPopUp.indexOfSelectedItem)) ?? .CRC)
 		}
+	}
+	
+	/// process files dropped on the tableview, icon, or are manually opened
+	func processFiles(fileNames: [String]) {
+		
+		processFileURLs(fileNames.map({ (aPath) -> NSURL in
+			return NSURL(fileURLWithPath: aPath)
+		}))
 	}
 	
 	// MARK: private methods
@@ -512,7 +577,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		let sorted = NSMutableArray(array: records)
 		sorted.sortUsingDescriptors([descriptor])
 		records.removeAll(keepCapacity: true)
-		records.extend(sorted as NSArray as! [FileEntry])
+		records.appendContentsOf(sorted as NSArray as! [FileEntry])
 		updateUI()
 	}
 	
@@ -610,5 +675,9 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		NSToolbarPrintItemIdentifier, NSToolbarCustomizeToolbarItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, NSToolbarSpaceItemIdentifier,
 		NSToolbarSeparatorItemIdentifier, RemoveToolbarIdentifier]
+	}
+	
+	override func validateToolbarItem(theItem: NSToolbarItem) -> Bool {
+		return true
 	}
 }

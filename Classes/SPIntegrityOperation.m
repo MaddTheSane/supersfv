@@ -54,7 +54,7 @@
         SPCryptoAlgorithm algorithm;
         uint8_t *dgst; // buffers
         
-        NSString *file = fileEntry.filePath;
+        NSURL *url = fileEntry.fileURL;
         NSString *expectedHash = fileEntry.expected;
 
         if (cryptoAlgorithm == SPCryptoAlgorithmUnknown) {
@@ -76,7 +76,7 @@
             algorithm = cryptoAlgorithm;
         }
 		
-		NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:file];
+		NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingFromURL:url error:NULL];
 		
         if (fileHandle == NULL)
             return;

@@ -59,7 +59,10 @@ class FileEntry : NSObject {
 	}
 	
 	var status = FileStatus.Unknown
-	let filePath: String
+	let fileURL: NSURL
+	var filePath: String {
+		return fileURL.path!
+	}
 	var expected: String
 	var result: String
 	
@@ -67,11 +70,19 @@ class FileEntry : NSObject {
 		self.init(path: path, expectedHash: nil)
 	}
 	
-	init(path: String, expectedHash expected: String!) {
-		filePath = path
+	convenience init(fileURL: NSURL) {
+		self.init(fileURL: fileURL, expectedHash: nil)
+	}
+	
+	init(fileURL: NSURL, expectedHash expected: String!) {
+		self.fileURL = fileURL
 		self.expected = expected ?? ""
 		result = ""
 		
 		super.init()
+	}
+	
+	convenience init(path: String, expectedHash expected: String!) {
+		self.init(fileURL: NSURL(fileURLWithPath: path), expectedHash: expected)
 	}
 }
