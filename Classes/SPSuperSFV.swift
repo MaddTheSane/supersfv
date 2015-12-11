@@ -77,7 +77,13 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		return scrollViewLicense.contentView.documentView as! NSTextView
 	}
 	
-	private let queue = NSOperationQueue()
+	private let queue: NSOperationQueue = {
+		let aqueue = NSOperationQueue()
+	
+		aqueue.name = "SPDecoder Queue"
+		
+		return aqueue
+	}()
 	private var records = [FileEntry]()
 	private var updateProgressTimer: NSTimer?
 	
@@ -194,7 +200,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 				for entry in self.records {
 					switch entry.status {
 					case .Valid, .Invalid:
-						output += "\(entry.filePath.lastPathComponent) \(entry.result)\n"
+						output += "\((entry.filePath as NSString).lastPathComponent) \(entry.result)\n"
 					default:
 						continue
 					}
@@ -273,7 +279,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 			guard let r = entry.rangeOfCharacterFromSet(NSCharacterSet(charactersInString: " "), options: .BackwardsSearch) else {
 				continue
 			}
-			let newPath = filePath.stringByDeletingLastPathComponent.stringByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
+			let newPath = ((filePath as NSString).stringByDeletingLastPathComponent as NSString).stringByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
 			let hash = entry[r.endIndex ..< entry.endIndex]
 			
 			let newEntry = FileEntry(path: newPath, expectedHash: hash)
@@ -311,11 +317,11 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		var isDir: ObjCBool = false
 
 		for file in fileNames {
-			if file.lastPathComponent.characters[file.lastPathComponent.characters.startIndex] == "." {
+			if (file as NSString).lastPathComponent.characters[(file as NSString).lastPathComponent.characters.startIndex] == "." {
 				continue // ignore hidden files
 			}
 			
-			if file.pathExtension.lowercaseString == "sfv" {
+			if (file as NSString).pathExtension.lowercaseString == "sfv" {
 				if fm.fileExistsAtPath(file, isDirectory: &isDir) && !isDir {
 					parseSFVFile(file)
 					continue
@@ -325,7 +331,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 				if fm.fileExistsAtPath(file, isDirectory: &isDir) && isDir {
 					do {
 						let dirContents = try fm.contentsOfDirectoryAtPath(file)
-						processFiles(dirContents.map({ return file.stringByAppendingPathComponent($0) }))
+						processFiles(dirContents.map({ return (file as NSString).stringByAppendingPathComponent($0) }))
 					} catch _ {
 						
 					}
@@ -441,7 +447,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		
 		switch key {
 		case "filepath":
-			return newEntry.filePath.lastPathComponent
+			return (newEntry.filePath as NSString).lastPathComponent
 			
 		case "status":
 			return FileEntry.imageForStatus(newEntry.status)
@@ -511,7 +517,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		let sorted = NSMutableArray(array: records)
 		sorted.sortUsingDescriptors([descriptor])
 		records.removeAll(keepCapacity: true)
-		records.extend(sorted as NSArray as! [FileEntry])
+		records.appendContentsOf(sorted as NSArray as! [FileEntry])
 		updateUI()
 	}
 	

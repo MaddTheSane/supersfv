@@ -74,4 +74,8 @@ class FileEntry : NSObject {
 		
 		super.init()
 	}
+	
+	override var description: String {
+		return "\(filePath): expected \(expected), result \(result)"
+	}
 }

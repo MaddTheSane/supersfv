@@ -45,8 +45,6 @@
 
 -(void)main
 {
-	@autoreleasepool {
-
     NSLog(@"Running for file %@", fileEntry.filePath);
 
 	if (![self isCancelled])
@@ -192,8 +190,6 @@
         [target addRecordObject:newEntry];
         [newEntry release];
          */
-
-    }
 	}
 }
 
