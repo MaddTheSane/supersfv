@@ -317,7 +317,8 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		var isDir: ObjCBool = false
 
 		for file in fileNames {
-			if (file as NSString).lastPathComponent.characters[(file as NSString).lastPathComponent.characters.startIndex] == "." {
+			let lastPathComp = (file as NSString).lastPathComponent
+			if lastPathComp.characters[lastPathComp.characters.startIndex] == "." {
 				continue // ignore hidden files
 			}
 			
