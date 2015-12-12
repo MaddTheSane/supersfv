@@ -149,9 +149,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		oPanel.beginSheetModalForWindow(windowMain) { (result) -> Void in
 			if result == NSModalResponseOK {
 				let urls = oPanel.URLs
-				self.processFiles(urls.map({ (aURL) -> String in
-					return aURL.path!
-				}))
+				self.processFileURLs(urls)
 			}
 		}
 	}
@@ -159,7 +157,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 	@IBAction func recalculateClicked(sender: AnyObject?) {
 		let t = records
 		records.removeAll(keepCapacity: true)
-		processFiles(t.map({ return $0.filePath }))
+		processFileURLs(t.map({ return $0.fileURL }))
 		updateUI()
 	}
 	
@@ -368,6 +366,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		}
 	}
 	
+	/// process files dropped on the tableview, icon, or are manually opened
 	func processFileURLs(fileURLs: [NSURL]) {
 		let fm = NSFileManager()
 
@@ -376,7 +375,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 				continue
 			}
 			if let lastPathComp = url.lastPathComponent {
-				if lastPathComp.characters[lastPathComp.characters.startIndex] == "." {
+				if lastPathComp.characters.first == "." {
 					continue // ignore hidden files
 				}
 			}
@@ -387,14 +386,13 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 					continue
 				}
 			}
-			
-			let isDirDict = try? url.resourceValuesForKeys([NSURLFileResourceTypeDirectory])
-			if let aDir = isDirDict?[NSURLFileResourceTypeDirectory] as? Bool where aDir {
+			let isDirDict = try? url.resourceValuesForKeys([NSURLFileResourceTypeKey])
+			if let aDir = isDirDict?[NSURLFileResourceTypeKey] as? String
+				where aDir == NSURLFileResourceTypeDirectory {
 				do {
 					let dirContents = try fm.contentsOfDirectoryAtURL(url, includingPropertiesForKeys: [], options: [])
 					processFileURLs(dirContents)
 				} catch _ {}
-				//parseSFVFile(url)
 				continue
 			}
 			let newEntry = FileEntry(fileURL: url)
@@ -513,7 +511,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		
 		switch key {
 		case "filepath":
-			return (newEntry.filePath as NSString).lastPathComponent
+			return newEntry.fileURL.lastPathComponent
 			
 		case "status":
 			return FileEntry.imageForStatus(newEntry.status)
