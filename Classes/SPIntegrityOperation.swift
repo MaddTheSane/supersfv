@@ -30,7 +30,6 @@ class IntegrityOperation: NSOperation {
 	}
 
 	override func main() {
-		autoreleasepool() {
 			print("Running for file \(fileEntry.filePath)")
 			guard !cancelled else {
 				return
@@ -137,6 +136,5 @@ class IntegrityOperation: NSOperation {
 			}
 			
 			fileEntry.result = hashString!
-		}
 	}
 }

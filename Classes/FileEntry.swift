@@ -85,4 +85,8 @@ class FileEntry : NSObject {
 	convenience init(path: String, expectedHash expected: String!) {
 		self.init(fileURL: NSURL(fileURLWithPath: path), expectedHash: expected)
 	}
+	
+	override var description: String {
+		return "\(filePath): expected \(expected), result \(result)"
+	}
 }

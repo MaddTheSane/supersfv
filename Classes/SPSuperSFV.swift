@@ -77,7 +77,13 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 		return scrollViewLicense.contentView.documentView as! NSTextView
 	}
 	
-	private let queue = NSOperationQueue()
+	private let queue: NSOperationQueue = {
+		let aqueue = NSOperationQueue()
+	
+		aqueue.name = "SPDecoder Queue"
+		
+		return aqueue
+	}()
 	private var records = [FileEntry]()
 	private var updateProgressTimer: NSTimer?
 	private var baseURL = NSURL(fileURLWithPath: NSHomeDirectory())
