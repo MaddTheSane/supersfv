@@ -43,7 +43,7 @@ private var applicationVersion: String {
 }
 
 @NSApplicationMain
-class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate {
+class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate {
 	@IBOutlet weak var buttonAdd: NSButton?
 	@IBOutlet weak var buttonCloseLicense: NSButton!
 	@IBOutlet weak var buttonContact: NSButton?
@@ -367,8 +367,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 	}
 	
 	/// process files dropped on the tableview, icon, or are manually opened
-	func processFileURLs(fileURLs: [NSURL]) {
-		let fm = NSFileManager()
+	func processFileURLs(fileURLs: [NSURL], fileManager fm: NSFileManager = NSFileManager.defaultManager()) {
 
 		for url in fileURLs {
 			if !url.fileURL {
@@ -391,7 +390,7 @@ class SSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVie
 				where aDir == NSURLFileResourceTypeDirectory {
 				do {
 					let dirContents = try fm.contentsOfDirectoryAtURL(url, includingPropertiesForKeys: [], options: [])
-					processFileURLs(dirContents)
+					processFileURLs(dirContents, fileManager: fm)
 				} catch _ {}
 				continue
 			}

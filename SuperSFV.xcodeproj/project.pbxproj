@@ -34,8 +34,6 @@
 		4E4AC9560AB7E6130046762E /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = SOURCE_ROOT; };
 		4E593E690AB371450092AE43 /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
 		4E593E6A0AB371450092AE43 /* crc32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32.c; sourceTree = "<group>"; };
-		4E971A910AB0FCF0005F28B2 /* SPSuperSFV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPSuperSFV.h; sourceTree = "<group>"; usesTabs = 1; };
-		4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPSuperSFV.m; sourceTree = "<group>"; usesTabs = 1; };
 		5542CD111A3173350081E21E /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		5542CD1A1A3174A70081E21E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		55AF20541B703AF4003F9A42 /* SPIntegrityOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SPIntegrityOperation.swift; sourceTree = "<group>"; };
@@ -64,8 +62,6 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				4E971A910AB0FCF0005F28B2 /* SPSuperSFV.h */,
-				4E971A920AB0FCF0005F28B2 /* SPSuperSFV.m */,
 				6D9FD366109DD83600729576 /* SPIntegrityOperation.h */,
 				6D9FD367109DD83600729576 /* SPIntegrityOperation.m */,
 				55A1EB9C1A31E4D200CB1E49 /* Swift */,
