@@ -92,6 +92,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		var dictionary = [String: AnyObject]()
 		dictionary["checksum_algorithm"] = "CRC32"; // default for most SFV programs
 		NSUserDefaultsController.sharedUserDefaultsController().initialValues = dictionary
+		NSUserDefaults.standardUserDefaults().registerDefaults(dictionary)
 		super.init()
 	}
 	
@@ -129,10 +130,8 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	@objc private func removeSelectedRecords(sender: AnyObject?) {
 		let rows = tableViewFileList.selectedRowIndexes
 		
-		var current_index = rows.lastIndex
-		while current_index != NSNotFound {
-			records.removeAtIndex(current_index)
-			current_index = rows.indexLessThanIndex(current_index)
+		for row in rows.reverse() {
+			records.removeAtIndex(row)
 		}
 		
 		updateUI()
@@ -155,9 +154,9 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	@IBAction func recalculateClicked(sender: AnyObject?) {
-		let t = records
+		let t = records.map({ return $0.fileURL })
 		records.removeAll(keepCapacity: true)
-		processFileURLs(t.map({ return $0.fileURL }))
+		processFileURLs(t)
 		updateUI()
 	}
 	

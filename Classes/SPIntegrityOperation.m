@@ -96,7 +96,7 @@
         
         switch (algorithm) {
             case SPCryptoAlgorithmCRC:
-                hashCtx.crc = crc32(0L,Z_NULL,0);
+                hashCtx.crc = crc32(0L, Z_NULL, 0);
                 break;
                 
             case SPCryptoAlgorithmMD5:
@@ -145,15 +145,15 @@
             hash = [[NSString stringWithFormat:@"%08x", hashCtx.crc] uppercaseString];
         } else {
             hash = @"";
-            dgst = (uint8_t *) calloc (((algorithm == SPCryptoAlgorithmMD5)?32:40), sizeof(uint8_t));
+            dgst = (uint8_t *) calloc (((algorithm == SPCryptoAlgorithmMD5) ? 32 : 40), sizeof(uint8_t));
             
             switch (algorithm) {
                 case SPCryptoAlgorithmSHA1:
-                    CC_SHA1_Final(dgst,&hashCtx.sha_ctx);
+                    CC_SHA1_Final(dgst, &hashCtx.sha_ctx);
                     break;
                     
                 case SPCryptoAlgorithmMD5:
-                    CC_MD5_Final(dgst,&hashCtx.md5_ctx);
+                    CC_MD5_Final(dgst, &hashCtx.md5_ctx);
                     break;
                     
                 default:

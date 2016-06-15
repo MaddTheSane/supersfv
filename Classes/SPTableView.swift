@@ -30,7 +30,7 @@ import Cocoa
 class SPTableView: NSTableView {
 	override func keyDown(theEvent: NSEvent) {
 		switch theEvent.keyCode {
-		case 51:
+		case 51: //delete key
 			NSNotificationCenter.defaultCenter().postNotificationName(kRemoveRecordFromList, object: nil)
 			
 		default:
