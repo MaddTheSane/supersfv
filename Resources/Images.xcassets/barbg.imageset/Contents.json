@@ -5,7 +5,7 @@
         "mode" : "3-part-vertical",
         "center" : {
           "mode" : "tile",
-          "height" : 12
+          "height" : 21
         },
         "cap-insets" : {
           "top" : 1,
@@ -21,11 +21,11 @@
         "mode" : "3-part-vertical",
         "center" : {
           "mode" : "tile",
-          "height" : 24
+          "height" : 44
         },
         "cap-insets" : {
           "top" : 1,
-          "bottom" : 3
+          "bottom" : 1
         }
       },
       "idiom" : "universal",
