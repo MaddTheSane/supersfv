@@ -43,7 +43,7 @@ private var applicationVersion: String {
 }
 
 @NSApplicationMain
-class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableViewDataSource, NSTableViewDelegate {
+class SPSuperSFV : NSObject, NSApplicationDelegate {
 	@IBOutlet weak var buttonAdd: NSButton?
 	@IBOutlet weak var buttonCloseLicense: NSButton!
 	@IBOutlet weak var buttonContact: NSButton?
@@ -99,7 +99,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 		setupToolbar()
 		
 		// selecting items in our table view and pressing the delete key
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "removeSelectedRecords:", name: kRemoveRecordFromList, object: nil)
+		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(SPSuperSFV.removeSelectedRecords(_:)), name: kRemoveRecordFromList, object: nil)
 		
 		// register for drag and drop on the table view
 		tableViewFileList.registerForDraggedTypes([NSFilenamesPboardType])
@@ -226,12 +226,12 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 			textViewLicense.string = "License file not found!"
 		}
 		
-		NSApp.beginSheet(licensePanel, modalForWindow: windowAbout, modalDelegate: nil, didEndSelector: nil, contextInfo: nil)
+		windowAbout.beginSheet(licensePanel, completionHandler: nil)
 	}
 	
 	@IBAction func closeLicense(sender: AnyObject?) {
 		licensePanel.orderOut(sender)
-		NSApp.endSheet(licensePanel, returnCode: 0)
+		windowAbout.endSheet(licensePanel)
 	}
 	
 	@IBAction func aboutIconClicked(sender: AnyObject?) {
@@ -292,14 +292,14 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 				if !newURL.checkResourceIsReachableAndReturnError(nil) {
 					newEntry.status = .FileNotFound
 					newEntry.result = "Missing"
-					errc++
+					errc += 1
 				}
 				
 				// length doesn't match CRC32, MD5 or SHA-1 respectively
 				if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
 					newEntry.status = .UnknownChecksum;
 					newEntry.expected = "Unknown";
-					errc++;
+					errc += 1;
 				}
 				
 				// if theres an error, then we don't need to continue with this entry
@@ -343,14 +343,14 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 			if !NSFileManager.defaultManager().fileExistsAtPath(newPath) {
 				newEntry.status = .FileNotFound
 				newEntry.result = "Missing"
-				errc++
+				errc += 1
 			}
 			
 			// length doesn't match CRC32, MD5 or SHA-1 respectively
 			if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
 				newEntry.status = .UnknownChecksum;
 				newEntry.expected = "Unknown";
-				errc++;
+				errc += 1;
 			}
 			
 			// if theres an error, then we don't need to continue with this entry
@@ -421,7 +421,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 		/* If this was the first operation added to the queue */
 		if (queue.operationCount == 1) {
 			startProcessingQueue()
-			updateProgressTimer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: "updateProgress:", userInfo: nil, repeats: true)
+			updateProgressTimer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: #selector(SPSuperSFV.updateProgress(_:)), userInfo: nil, repeats: true)
 		}
 	}
 	
@@ -438,11 +438,11 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 		for entry in records {
 			switch entry.status {
 			case .FileNotFound, .UnknownChecksum:
-				error_count++
+				error_count += 1
 				continue
 				
 			case .Valid:
-				verified_count++
+				verified_count += 1
 				continue
 				
 			default:
@@ -455,10 +455,10 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 			
 			if entry.expected.compare(entry.result, options: .CaseInsensitiveSearch) != .OrderedSame {
 				entry.status = .Invalid
-				failure_count++
+				failure_count += 1
 			} else {
 				entry.status = .Valid
-				verified_count++
+				verified_count += 1
 			}
 		}
 		
@@ -499,9 +499,10 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 		self.updateUI()
 		statusField.integerValue = queue.operationCount
 	}
+}
 
-	// MARK: TableView delegate
-	
+// MARK: TableView delegate
+extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 	func tableView(tableView: NSTableView, objectValueForTableColumn tableColumn: NSTableColumn?, row: Int) -> AnyObject? {
 		guard let key = tableColumn?.identifier else {
 			return nil
@@ -583,8 +584,10 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 		records.appendContentsOf(sorted as NSArray as! [FileEntry])
 		updateUI()
 	}
-	
-	// MARK: Toolbar delegate
+}
+
+// MARK: Toolbar delegate
+extension SPSuperSFV: NSToolbarDelegate {
 	private func setupToolbar() {
 		let toolbar = NSToolbar(identifier: SuperSFVToolbarIdentifier)
 		toolbar.allowsUserCustomization = true
@@ -606,7 +609,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 			toolbarItem!.toolTip = "Add a file or the contents of a folder"
 			toolbarItem!.image = NSImage(named: "edit_add")
 			toolbarItem!.target = self
-			toolbarItem!.action = "addClicked:"
+			toolbarItem!.action = #selector(SPSuperSFV.addClicked(_:))
 			toolbarItem!.autovalidates = false
 
 		case RemoveToolbarIdentifier:
@@ -616,7 +619,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 			toolbarItem!.toolTip = "Remove selected items or prompt to remove all items if none are selected"
 			toolbarItem!.image = NSImage(named: "edit_remove")
 			toolbarItem!.target = self
-			toolbarItem!.action = "removeClicked:"
+			toolbarItem!.action = #selector(SPSuperSFV.removeClicked(_:))
 			toolbarItem!.autovalidates = false
 
 		case RecalculateToolbarIdentifier:
@@ -626,7 +629,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 			toolbarItem!.toolTip = "Recalculate checksums"
 			toolbarItem!.image = NSImage(named: "reload")
 			toolbarItem!.target = self
-			toolbarItem!.action = "recalculateClicked:"
+			toolbarItem!.action = #selector(SPSuperSFV.recalculateClicked(_:))
 			toolbarItem!.autovalidates = false
 
 		case StopToolbarIdentifier:
@@ -636,7 +639,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 			toolbarItem!.toolTip = "Stop calculating checksums"
 			toolbarItem!.image = NSImage(named: "stop")
 			toolbarItem!.target = self
-			toolbarItem!.action = "stopClicked:"
+			toolbarItem!.action = #selector(SPSuperSFV.stopClicked(_:))
 			toolbarItem!.autovalidates = false
 
 		case SaveToolbarIdentifier:
@@ -646,7 +649,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate, NSToolbarDelegate, NSTableVi
 			toolbarItem!.toolTip = "Save current state"
 			toolbarItem!.image = NSImage(named: "1downarrow")
 			toolbarItem!.target = self
-			toolbarItem!.action = "saveClicked:"
+			toolbarItem!.action = #selector(SPSuperSFV.saveClicked(_:))
 			toolbarItem!.autovalidates = false
 
 		case ChecksumToolbarIdentifier:

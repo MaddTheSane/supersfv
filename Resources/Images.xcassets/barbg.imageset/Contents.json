@@ -1,11 +1,33 @@
 {
   "images" : [
     {
+      "resizing" : {
+        "mode" : "3-part-vertical",
+        "center" : {
+          "mode" : "tile",
+          "height" : 12
+        },
+        "cap-insets" : {
+          "top" : 1,
+          "bottom" : 1
+        }
+      },
       "idiom" : "universal",
       "filename" : "barbg.png",
       "scale" : "1x"
     },
     {
+      "resizing" : {
+        "mode" : "3-part-vertical",
+        "center" : {
+          "mode" : "tile",
+          "height" : 24
+        },
+        "cap-insets" : {
+          "top" : 1,
+          "bottom" : 3
+        }
+      },
       "idiom" : "universal",
       "filename" : "barbg2.png",
       "scale" : "2x"

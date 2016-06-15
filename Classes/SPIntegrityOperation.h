@@ -39,6 +39,7 @@ typedef NS_ENUM(int, SPCryptoAlgorithm) {
 
 @property (readonly, copy, nullable) NSString *hashString;
 
+- (instancetype)init UNAVAILABLE_ATTRIBUTE;
 - (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object;
 - (instancetype)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm NS_DESIGNATED_INITIALIZER;
 @end
