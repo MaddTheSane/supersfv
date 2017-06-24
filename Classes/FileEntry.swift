@@ -31,26 +31,26 @@ import AppKit.NSImage
 
 class FileEntry : NSObject {
 	@objc enum FileStatus : Int {
-		case Unknown = 0
-		case Checking
-		case Valid
-		case Invalid
-		case FileNotFound
-		case UnknownChecksum = -1
+		case unknown = 0
+		case checking
+		case valid
+		case invalid
+		case fileNotFound
+		case unknownChecksum = -1
 	}
 	
-	class func imageForStatus(status: FileStatus) -> NSImage? {
+	class func imageForStatus(_ status: FileStatus) -> NSImage? {
 		switch (status) {
-		case .Checking:
+		case .checking:
 			return NSImage(named: NSImageNameStatusPartiallyAvailable)
 			
-		case .Valid:
+		case .valid:
 			return NSImage(named: NSImageNameStatusAvailable)
 			
-		case .Invalid:
+		case .invalid:
 			return NSImage(named: NSImageNameStatusUnavailable)
 			
-		case .FileNotFound, .UnknownChecksum:
+		case .fileNotFound, .unknownChecksum:
 			return NSImage(named: NSImageNameStatusNone)
 			
 		default:
@@ -58,10 +58,10 @@ class FileEntry : NSObject {
 		}
 	}
 	
-	var status = FileStatus.Unknown
-	let fileURL: NSURL
+	var status = FileStatus.unknown
+	let fileURL: URL
 	var filePath: String {
-		return fileURL.path!
+		return fileURL.path
 	}
 	var expected: String
 	var result: String
@@ -70,11 +70,11 @@ class FileEntry : NSObject {
 		self.init(path: path, expectedHash: nil)
 	}
 	
-	convenience init(fileURL: NSURL) {
+	convenience init(fileURL: URL) {
 		self.init(fileURL: fileURL, expectedHash: nil)
 	}
 	
-	init(fileURL: NSURL, expectedHash expected: String!) {
+	init(fileURL: URL, expectedHash expected: String!) {
 		self.fileURL = fileURL
 		self.expected = expected ?? ""
 		result = ""
@@ -83,7 +83,7 @@ class FileEntry : NSObject {
 	}
 	
 	convenience init(path: String, expectedHash expected: String!) {
-		self.init(fileURL: NSURL(fileURLWithPath: path), expectedHash: expected)
+		self.init(fileURL: URL(fileURLWithPath: path), expectedHash: expected)
 	}
 	
 	override var description: String {

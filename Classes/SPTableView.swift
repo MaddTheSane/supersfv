@@ -28,13 +28,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 import Cocoa
 
 class SPTableView: NSTableView {
-	override func keyDown(theEvent: NSEvent) {
+	override func keyDown(with theEvent: NSEvent) {
 		switch theEvent.keyCode {
 		case 51: //delete key
-			NSNotificationCenter.defaultCenter().postNotificationName(kRemoveRecordFromList, object: nil)
+			NotificationCenter.default.post(name: Notification.Name(rawValue: kRemoveRecordFromList), object: nil)
 			
 		default:
-			super.keyDown(theEvent)
+			super.keyDown(with: theEvent)
 		}
 	}
 }

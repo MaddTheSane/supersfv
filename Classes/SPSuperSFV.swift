@@ -38,8 +38,8 @@ private let SaveToolbarIdentifier			= "Save Toolbar Identifier"
 let kRemoveRecordFromList = "RM_RECORD_FROM_LIST"
 
 private var applicationVersion: String {
-	let version = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String
-	return version ?? ""
+	let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+	return version ?? "unknown"
 }
 
 @NSApplicationMain
@@ -77,100 +77,100 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		return scrollViewLicense.contentView.documentView as! NSTextView
 	}
 	
-	private let queue: NSOperationQueue = {
-		let aqueue = NSOperationQueue()
+	fileprivate let queue: OperationQueue = {
+		let aqueue = OperationQueue()
 	
 		aqueue.name = "SPDecoder Queue"
 		
 		return aqueue
 	}()
-	private var records = [FileEntry]()
-	private var updateProgressTimer: NSTimer?
-	private var baseURL = NSURL(fileURLWithPath: NSHomeDirectory())
+	fileprivate var records = [FileEntry]()
+	fileprivate var updateProgressTimer: Timer?
+	fileprivate var baseURL = URL(fileURLWithPath: NSHomeDirectory())
 	
 	override init() {
-		var dictionary = [String: AnyObject]()
+		var dictionary = [String: Any]()
 		dictionary["checksum_algorithm"] = "CRC32"; // default for most SFV programs
-		NSUserDefaultsController.sharedUserDefaultsController().initialValues = dictionary
-		NSUserDefaults.standardUserDefaults().registerDefaults(dictionary)
+		NSUserDefaultsController.shared().initialValues = dictionary
+		UserDefaults.standard.register(defaults: dictionary)
 		super.init()
 	}
 	
-	func applicationWillFinishLaunching(notification: NSNotification) {
+	func applicationWillFinishLaunching(_ notification: Notification) {
 		setupToolbar()
 		
 		// selecting items in our table view and pressing the delete key
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(SPSuperSFV.removeSelectedRecords(_:)), name: kRemoveRecordFromList, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(SPSuperSFV.removeSelectedRecords(_:)), name: NSNotification.Name(rawValue: kRemoveRecordFromList), object: nil)
 		
 		// register for drag and drop on the table view
-		tableViewFileList.registerForDraggedTypes([NSFilenamesPboardType])
+		tableViewFileList.register(forDraggedTypes: [NSFilenamesPboardType])
 		
 		// make the window pertee and show it
-		buttonStop?.enabled = false
+		buttonStop?.isEnabled = false
 		updateUI()
 		
 		windowMain.center()
 		windowMain.makeKeyAndOrderFront(nil)
 	}
 	
-	func applicationShouldTerminateAfterLastWindowClosed(sender: NSApplication) -> Bool {
+	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
 		return true
 	}
 	
-	func application(sender: NSApplication, openFile filename: String) -> Bool {
+	func application(_ sender: NSApplication, openFile filename: String) -> Bool {
 		processFiles([filename])
 		return true
 	}
 	
-	func application(sender: NSApplication, openFiles filenames: [String]) {
+	func application(_ sender: NSApplication, openFiles filenames: [String]) {
 		processFiles(filenames)
 	}
 	
 	/// remove selected records from our table view
-	@objc private func removeSelectedRecords(sender: AnyObject?) {
+	@objc private func removeSelectedRecords(_ sender: AnyObject?) {
 		let rows = tableViewFileList.selectedRowIndexes
 		
-		for row in rows.reverse() {
-			records.removeAtIndex(row)
+		for row in rows.reversed() {
+			records.remove(at: row)
 		}
 		
 		updateUI()
 	}
 	
 	// MARK: IBActions
-	@IBAction func addClicked(sender: AnyObject) {
+	@IBAction func addClicked(_ sender: AnyObject) {
 		let oPanel = NSOpenPanel()
 		oPanel.prompt = "Add"
 		oPanel.title = "Add files or folder contents"
 		oPanel.allowsMultipleSelection = true
 		oPanel.canChooseFiles = true
 		oPanel.canChooseDirectories = true
-		oPanel.beginSheetModalForWindow(windowMain) { (result) -> Void in
+		oPanel.beginSheetModal(for: windowMain) { (result) -> Void in
 			if result == NSModalResponseOK {
-				let urls = oPanel.URLs
+				let urls = oPanel.urls
 				self.processFileURLs(urls)
 			}
 		}
 	}
 	
-	@IBAction func recalculateClicked(sender: AnyObject?) {
+	@IBAction func recalculateClicked(_ sender: AnyObject?) {
 		let t = records.map({ return $0.fileURL })
-		records.removeAll(keepCapacity: true)
+		records.removeAll(keepingCapacity: true)
 		processFileURLs(t)
 		updateUI()
 	}
 	
-	@IBAction func removeClicked(sender: AnyObject?) {
+	@IBAction func removeClicked(_ sender: AnyObject?) {
 		if tableViewFileList.numberOfSelectedRows == 0 && records.count > 0 {
 			let alert = NSAlert()
 			alert.messageText = "Confirm Removal"
 			alert.informativeText = "You sure you want to ditch all of the entries? They're so cute!"
-			alert.addButtonWithTitle("Remove All")
-			alert.addButtonWithTitle("Cancel")
+			alert.addButton(withTitle: "Remove All")
+			alert.addButton(withTitle: "Cancel")
 			
-			alert.beginSheetModalForWindow(windowMain, completionHandler: { (returnCode) -> Void in
+			alert.beginSheetModal(for: windowMain, completionHandler: { (returnCode) -> Void in
 				if returnCode == NSAlertFirstButtonReturn {
-					self.records.removeAll(keepCapacity: false)
+					self.records.removeAll(keepingCapacity: false)
 					self.updateUI()
 				}
 			})
@@ -179,7 +179,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		}
 	}
 	
-	@IBAction func saveClicked(sender: AnyObject?) {
+	@IBAction func saveClicked(_ sender: AnyObject?) {
 		if records.count == 0 {
 			NSBeep()
 			return
@@ -190,14 +190,14 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		sPanel.title = "Save"
 		sPanel.allowedFileTypes = ["sfv"]
 
-		sPanel.beginSheetModalForWindow(windowMain) { (result) -> Void in
+		sPanel.beginSheetModal(for: windowMain) { (result) -> Void in
 			if result == NSModalResponseOK {
 				// shameless plug to start out with
 				var output = "; Created using SuperSFV v\(applicationVersion) on Mac OS X\n"
 
 				for entry in self.records {
 					switch entry.status {
-					case .Valid, .Invalid:
+					case .valid, .invalid:
 						output += "\((entry.filePath as NSString).lastPathComponent) \(entry.result)\n"
 					default:
 						continue
@@ -205,7 +205,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				}
 				
 				do {
-					try (output as NSString).writeToURL(sPanel.URL!, atomically: false, encoding: NSUTF8StringEncoding)
+					try (output).write(to: sPanel.url!, atomically: false, encoding: String.Encoding.utf8)
 				} catch _ {
 					
 				}
@@ -213,13 +213,13 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		}
 	}
 	
-	@IBAction func stopClicked(sender: AnyObject?) {
+	@IBAction func stopClicked(_ sender: AnyObject?) {
 		queue.cancelAllOperations()
 	}
 	
-	@IBAction func showLicense(sender: AnyObject?) {
-		if let licenseURL = NSBundle.mainBundle().URLForResource("License", withExtension: "txt") {
-			textViewLicense.string = (try! NSString(contentsOfURL: licenseURL, usedEncoding: nil)) as String
+	@IBAction func showLicense(_ sender: AnyObject?) {
+		if let licenseURL = Bundle.main.url(forResource: "License", withExtension: "txt") {
+			textViewLicense.string = (try! NSString(contentsOf: licenseURL, usedEncoding: nil)) as String
 		} else {
 			//TODO: rtf support in the future?
 			textViewLicense.string = "License file not found!"
@@ -228,75 +228,75 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		windowAbout.beginSheet(licensePanel, completionHandler: nil)
 	}
 	
-	@IBAction func closeLicense(sender: AnyObject?) {
+	@IBAction func closeLicense(_ sender: AnyObject?) {
 		licensePanel.orderOut(sender)
 		windowAbout.endSheet(licensePanel)
 	}
 	
-	@IBAction func aboutIconClicked(sender: AnyObject?) {
+	@IBAction func aboutIconClicked(_ sender: AnyObject?) {
 		
 	}
 	
-	@IBAction func showAbout(sender: AnyObject?) {
+	@IBAction func showAbout(_ sender: AnyObject?) {
 		// Credits
-		var creditsURL = NSBundle.mainBundle().URLForResource("Credits", withExtension: "rtf")
+		var creditsURL = Bundle.main.url(forResource: "Credits", withExtension: "rtf")
 		if creditsURL == nil {
 			// just in case we add images later on.
-			creditsURL = NSBundle.mainBundle().URLForResource("Credits", withExtension: "rtfd")
+			creditsURL = Bundle.main.url(forResource: "Credits", withExtension: "rtfd")
 		}
-		let creditsString = NSAttributedString(URL: creditsURL!, documentAttributes: nil)!
+		let creditsString = NSAttributedString(url: creditsURL!, documentAttributes: nil)!
 		textViewCredits.textStorage?.setAttributedString(creditsString)
 		
 		// Version
 		versionField.stringValue = applicationVersion
 		
 		// die you little blue bastard for attempting to thwart my easter egg
-		easterEggButton.focusRingType = .None
+		easterEggButton.focusRingType = .none
 		
 		// Center n show eet
 		windowAbout.center()
 		windowAbout.makeKeyAndOrderFront(nil)
 	}
 	
-	@IBAction func contactClicked(sender: AnyObject?) {
-		NSWorkspace.sharedWorkspace().openURL(NSURL(string: "mailto:reikonmusha@gmail.com")!)
+	@IBAction func contactClicked(_ sender: AnyObject?) {
+		NSWorkspace.shared().open(URL(string: "mailto:reikonmusha@gmail.com")!)
 	}
 	
-	@objc(parseSFVFileAtFileURL:) func parseSFVFile(fileURL: NSURL) {
-		let thisBaseURL = fileURL.URLByDeletingLastPathComponent!
+	@objc(parseSFVFileAtFileURL:) func parseSFVFile(_ fileURL: URL) {
+		let thisBaseURL = fileURL.deletingLastPathComponent()
 		baseURL = thisBaseURL
 		do {
-			let rawContents = try NSString(contentsOfURL: fileURL, usedEncoding: nil)
-			let contents = rawContents.componentsSeparatedByCharactersInSet(NSCharacterSet.newlineCharacterSet())
+			let rawContents = try NSString(contentsOf: fileURL, usedEncoding: nil)
+			let contents = rawContents.components(separatedBy: CharacterSet.newlines)
 			for entry1 in contents {
 				var errc = 0 //error count
 				
-				let entry = entry1.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+				let entry = entry1.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 				if entry == "" {
 					continue
 				}
 				if entry.characters.first == ";" {
 					continue; // skip the line if it's a comment
 				}
-				guard let r = entry.rangeOfCharacterFromSet(NSCharacterSet(charactersInString: " "), options: .BackwardsSearch) else {
+				guard let r = entry.rangeOfCharacter(from: CharacterSet(charactersIn: " "), options: .backwards) else {
 					continue
 				}
-				let newURL = NSURL(string: entry[entry.startIndex..<r.startIndex], relativeToURL: fileURL)!
+				let newURL = URL(string: entry[entry.startIndex..<r.lowerBound], relativeTo: fileURL)!
 				//let newURL = thisBaseURL.URLByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
-				let hash = entry[r.endIndex ..< entry.endIndex]
+				let hash = entry[r.upperBound ..< entry.endIndex]
 				
 				let newEntry = FileEntry(fileURL: newURL, expectedHash: hash)
 				
 				// file doesn't exist...
-				if !newURL.checkResourceIsReachableAndReturnError(nil) {
-					newEntry.status = .FileNotFound
+				if !(newURL as NSURL).checkResourceIsReachableAndReturnError(nil) {
+					newEntry.status = .fileNotFound
 					newEntry.result = "Missing"
 					errc += 1
 				}
 				
 				// length doesn't match CRC32, MD5 or SHA-1 respectively
 				if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
-					newEntry.status = .UnknownChecksum;
+					newEntry.status = .unknownChecksum;
 					newEntry.expected = "Unknown";
 					errc += 1;
 				}
@@ -308,7 +308,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 					continue;
 				}
 				// assume it'll fail until proven otherwise
-				newEntry.status = .Invalid;
+				newEntry.status = .invalid;
 				
 				queueEntry(newEntry)
 			}
@@ -318,36 +318,36 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		
 	}
 	
-	@objc(parseSFVFileAtFilePath:) func parseSFVFile(filePath: String) {
-		let contents = (try! NSString(contentsOfFile: filePath, usedEncoding: nil)).componentsSeparatedByString("\n")
+	@objc(parseSFVFileAtFilePath:) func parseSFVFile(_ filePath: String) {
+		let contents = (try! NSString(contentsOfFile: filePath, usedEncoding: nil)).components(separatedBy: "\n")
 		for entry1 in contents {
 			var errc = 0 //error count
 
-			let entry = entry1.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+			let entry = entry1.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 			if entry == "" {
 				continue
 			}
 			if entry.characters.first == ";" {
 				continue; // skip the line if it's a comment
 			}
-			guard let r = entry.rangeOfCharacterFromSet(NSCharacterSet(charactersInString: " "), options: .BackwardsSearch) else {
+			guard let r = entry.rangeOfCharacter(from: CharacterSet(charactersIn: " "), options: .backwards) else {
 				continue
 			}
-			let newPath = ((filePath as NSString).stringByDeletingLastPathComponent as NSString).stringByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
-			let hash = entry[r.endIndex ..< entry.endIndex]
+			let newPath = ((filePath as NSString).deletingLastPathComponent as NSString).appendingPathComponent(entry[entry.startIndex..<r.lowerBound])
+			let hash = entry[r.upperBound ..< entry.endIndex]
 			
 			let newEntry = FileEntry(path: newPath, expectedHash: hash)
 			
 			// file doesn't exist...
-			if !NSFileManager.defaultManager().fileExistsAtPath(newPath) {
-				newEntry.status = .FileNotFound
+			if !FileManager.default.fileExists(atPath: newPath) {
+				newEntry.status = .fileNotFound
 				newEntry.result = "Missing"
 				errc += 1
 			}
 			
 			// length doesn't match CRC32, MD5 or SHA-1 respectively
 			if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
-				newEntry.status = .UnknownChecksum;
+				newEntry.status = .unknownChecksum;
 				newEntry.expected = "Unknown";
 				errc += 1;
 			}
@@ -359,36 +359,35 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				continue;
 			}
 			// assume it'll fail until proven otherwise
-			newEntry.status = .Invalid;
+			newEntry.status = .invalid;
 			
 			queueEntry(newEntry)
 		}
 	}
 	
 	/// process files dropped on the tableview, icon, or are manually opened
-	func processFileURLs(fileURLs: [NSURL], fileManager fm: NSFileManager = NSFileManager.defaultManager()) {
+	func processFileURLs(_ fileURLs: [URL], fileManager fm: FileManager = FileManager.default) {
 
 		for url in fileURLs {
-			if !url.fileURL {
+			if !url.isFileURL {
 				continue
 			}
-			if let lastPathComp = url.lastPathComponent {
+			let lastPathComp = url.lastPathComponent
 				if lastPathComp.characters.first == "." {
 					continue // ignore hidden files
 				}
-			}
-			if let pathExt = url.pathExtension where pathExt.lowercaseString == "sfv" {
-				let isDirDict = try? url.resourceValuesForKeys([NSURLFileResourceTypeDirectory])
-				if let aDir = isDirDict?[NSURLFileResourceTypeDirectory] as? Bool where !aDir {
+			let pathExt = url.pathExtension
+			if pathExt.lowercased() == "sfv" {
+				let isDirDict = try? url.resourceValues(forKeys: [.fileResourceTypeKey])
+				if let aDir = isDirDict?.fileResourceType, aDir != URLFileResourceType.directory {
 					parseSFVFile(url)
 					continue
 				}
 			}
-			let isDirDict = try? url.resourceValuesForKeys([NSURLFileResourceTypeKey])
-			if let aDir = isDirDict?[NSURLFileResourceTypeKey] as? String
-				where aDir == NSURLFileResourceTypeDirectory {
+			let isDirDict = try? url.resourceValues(forKeys: [URLResourceKey.fileResourceTypeKey])
+			if let aDir = isDirDict?.fileResourceType, aDir == URLFileResourceType.directory {
 				do {
-					let dirContents = try fm.contentsOfDirectoryAtURL(url, includingPropertiesForKeys: [], options: [])
+					let dirContents = try fm.contentsOfDirectory(at: url, includingPropertiesForKeys: [], options: [])
 					processFileURLs(dirContents, fileManager: fm)
 				} catch _ {}
 				continue
@@ -399,36 +398,36 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	/// process files dropped on the tableview, icon, or are manually opened
-	func processFiles(fileNames: [String]) {
+	func processFiles(_ fileNames: [String]) {
 		
-		processFileURLs(fileNames.map({ (aPath) -> NSURL in
-			return NSURL(fileURLWithPath: aPath)
+		processFileURLs(fileNames.map({ (aPath) -> URL in
+			return URL(fileURLWithPath: aPath)
 		}))
 	}
 	
 	// MARK: private methods
-	private func queueEntry(entry: FileEntry, algorithm: SPCryptoAlgorithm = .Unknown) {
+	fileprivate func queueEntry(_ entry: FileEntry, algorithm: SPCryptoAlgorithm = .unknown) {
 		let integrityOp = SPIntegrityOperation(fileEntry: entry, target: self, algorithm: algorithm)
 		
 		queue.addOperation(integrityOp)
 		
 		/* TODO: Set image indicating "in progress" */
-		entry.status = .Checking;
+		entry.status = .checking;
 		
 		records.append(entry)
 		
 		/* If this was the first operation added to the queue */
 		if (queue.operationCount == 1) {
 			startProcessingQueue()
-			updateProgressTimer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: #selector(SPSuperSFV.updateProgress(_:)), userInfo: nil, repeats: true)
+			updateProgressTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(SPSuperSFV.updateProgress(_:)), userInfo: nil, repeats: true)
 		}
 	}
 	
 	/// updates the general UI, i.e the toolbar items, and reloads the data for our tableview
-	private func updateUI() {
-		buttonRecalculate?.enabled = records.count > 0
-		buttonRemove?.enabled = records.count > 0
-		buttonSave?.enabled = records.count > 0
+	fileprivate func updateUI() {
+		buttonRecalculate?.isEnabled = records.count > 0
+		buttonRemove?.isEnabled = records.count > 0
+		buttonSave?.isEnabled = records.count > 0
 		fileCountField.integerValue = records.count
 
 		// other 'stats' .. may be a bit sloppy
@@ -436,11 +435,11 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		
 		for entry in records {
 			switch entry.status {
-			case .FileNotFound, .UnknownChecksum:
+			case .fileNotFound, .unknownChecksum:
 				error_count += 1
 				continue
 				
-			case .Valid:
+			case .valid:
 				verified_count += 1
 				continue
 				
@@ -452,11 +451,11 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				continue
 			}
 			
-			if entry.expected.compare(entry.result, options: .CaseInsensitiveSearch) != .OrderedSame {
-				entry.status = .Invalid
+			if entry.expected.compare(entry.result, options: .caseInsensitive) != .orderedSame {
+				entry.status = .invalid
 				failure_count += 1
 			} else {
-				entry.status = .Valid
+				entry.status = .valid
 				verified_count += 1
 			}
 		}
@@ -469,26 +468,26 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		tableViewFileList.scrollRowToVisible(records.count - 1)
 	}
 	
-	private func startProcessingQueue() {
-		progressBar.indeterminate = true
-		progressBar.hidden = false
+	fileprivate func startProcessingQueue() {
+		progressBar.isIndeterminate = true
+		progressBar.isHidden = false
 		progressBar.startAnimation(self)
-		buttonStop?.enabled = true
-		checksumPopUp.enabled = false
-		statusField.hidden = false
+		buttonStop?.isEnabled = true
+		checksumPopUp.isEnabled = false
+		statusField.isHidden = false
 	}
 	
-	private func stopProcessingQueue() {
+	fileprivate func stopProcessingQueue() {
 		progressBar.stopAnimation(self)
-		progressBar.hidden = true
-		buttonStop?.enabled = false
-		checksumPopUp.enabled = true
-		statusField.hidden = true
+		progressBar.isHidden = true
+		buttonStop?.isEnabled = false
+		checksumPopUp.isEnabled = true
+		statusField.isHidden = true
 		statusField.stringValue = ""
 	}
 	
 	/// Called periodically for updating the UI
-	@objc private func updateProgress(timer: NSTimer) {
+	@objc fileprivate func updateProgress(_ timer: Timer) {
 		if queue.operationCount == 0 {
 			timer.invalidate()
 			updateProgressTimer = nil
@@ -502,7 +501,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 
 // MARK: TableView delegate
 extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
-	func tableView(tableView: NSTableView, objectValueForTableColumn tableColumn: NSTableColumn?, row: Int) -> AnyObject? {
+	func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
 		guard let key = tableColumn?.identifier else {
 			return nil
 		}
@@ -516,13 +515,13 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 			return FileEntry.imageForStatus(newEntry.status)
 			
 		case "expected":
-			if newEntry.status == .UnknownChecksum {
+			if newEntry.status == .unknownChecksum {
 				return "Unknown (not recognized)"
 			}
 			return newEntry.expected
 			
 		case "result":
-			if newEntry.status == .FileNotFound {
+			if newEntry.status == .fileNotFound {
 				return "Missing"
 			}
 			return newEntry.result
@@ -534,17 +533,17 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 		return nil
 	}
 	
-	func numberOfRowsInTableView(tableView: NSTableView) -> Int {
+	func numberOfRows(in tableView: NSTableView) -> Int {
 		return records.count
 	}
 	
-	func tableView(tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int, proposedDropOperation dropOperation: NSTableViewDropOperation) -> NSDragOperation {
-		return .Every
+	func tableView(_ tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int, proposedDropOperation dropOperation: NSTableViewDropOperation) -> NSDragOperation {
+		return .every
 	}
 	
-	func tableView(tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableViewDropOperation) -> Bool {
+	func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableViewDropOperation) -> Bool {
 		let pboard = info.draggingPasteboard()
-		guard let files = pboard.propertyListForType(NSFilenamesPboardType) as? NSArray as? [String] else {
+		guard let files = pboard.propertyList(forType: NSFilenamesPboardType) as? NSArray as? [String] else {
 			return false
 		}
 		
@@ -553,7 +552,7 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 		return true
 	}
 	
-	func tableView(tableView: NSTableView, didClickTableColumn tableColumn: NSTableColumn) {
+	func tableView(_ tableView: NSTableView, didClick tableColumn: NSTableColumn) {
 		guard tableView === tableViewFileList else {
 			return
 		}
@@ -561,44 +560,44 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 		let allColums = tableViewFileList.tableColumns
 		for aColumn in allColums {
 			if aColumn !== tableColumn {
-				tableViewFileList.setIndicatorImage(nil, inTableColumn: aColumn)
+				tableViewFileList.setIndicatorImage(nil, in: aColumn)
 			}
 		}
 		
 		tableViewFileList.highlightedTableColumn = tableColumn
 		
-		if tableViewFileList.indicatorImageInTableColumn(tableColumn) != NSImage(named: "NSAscendingSortIndicator") {
-			tableViewFileList.setIndicatorImage(NSImage(named: "NSAscendingSortIndicator"), inTableColumn: tableColumn)
+		if tableViewFileList.indicatorImage(in: tableColumn) != NSImage(named: "NSAscendingSortIndicator") {
+			tableViewFileList.setIndicatorImage(NSImage(named: "NSAscendingSortIndicator"), in: tableColumn)
 			sortWithDescriptor(NSSortDescriptor(key: tableColumn.identifier, ascending: true))
 		} else {
-			tableViewFileList.setIndicatorImage(NSImage(named: "NSDescendingSortIndicator"), inTableColumn: tableColumn)
+			tableViewFileList.setIndicatorImage(NSImage(named: "NSDescendingSortIndicator"), in: tableColumn)
 			sortWithDescriptor(NSSortDescriptor(key: tableColumn.identifier, ascending: false))
 		}
 	}
 	
-	func sortWithDescriptor(descriptor: NSSortDescriptor) {
+	func sortWithDescriptor(_ descriptor: NSSortDescriptor) {
 		let sorted = NSMutableArray(array: records)
-		sorted.sortUsingDescriptors([descriptor])
-		records.removeAll(keepCapacity: true)
-		records.appendContentsOf(sorted as NSArray as! [FileEntry])
+		sorted.sort(using: [descriptor])
+		records.removeAll(keepingCapacity: true)
+		records.append(contentsOf: sorted as NSArray as! [FileEntry])
 		updateUI()
 	}
 }
 
 // MARK: Toolbar delegate
 extension SPSuperSFV: NSToolbarDelegate {
-	private func setupToolbar() {
+	fileprivate func setupToolbar() {
 		let toolbar = NSToolbar(identifier: SuperSFVToolbarIdentifier)
 		toolbar.allowsUserCustomization = true
 		toolbar.autosavesConfiguration = true
-		toolbar.displayMode = .IconOnly
+		toolbar.displayMode = .iconOnly
 		//toolbar.sizeMode = NSToolbarSizeModeSmall;
 
 		toolbar.delegate = self
 		windowMain.toolbar = toolbar
 	}
 	
-	func toolbar(toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: String, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
+	func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: String, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
 		var toolbarItem: NSToolbarItem? = nil
 		switch itemIdentifier {
 		case AddToolbarIdentifier:
@@ -667,14 +666,14 @@ extension SPSuperSFV: NSToolbarDelegate {
 		return toolbarItem
 	}
 	
-	func toolbarDefaultItemIdentifiers(toolbar: NSToolbar) -> [String] {
+	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [String] {
 		return [AddToolbarIdentifier, RemoveToolbarIdentifier,
 		RecalculateToolbarIdentifier, NSToolbarSeparatorItemIdentifier,
 		ChecksumToolbarIdentifier, NSToolbarFlexibleSpaceItemIdentifier,
 		SaveToolbarIdentifier, StopToolbarIdentifier]
 	}
 	
-	func toolbarAllowedItemIdentifiers(toolbar: NSToolbar) -> [String] {
+	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [String] {
 		return [AddToolbarIdentifier, RecalculateToolbarIdentifier,
 		StopToolbarIdentifier, SaveToolbarIdentifier, ChecksumToolbarIdentifier,
 		NSToolbarPrintItemIdentifier, NSToolbarCustomizeToolbarItemIdentifier,
@@ -682,7 +681,7 @@ extension SPSuperSFV: NSToolbarDelegate {
 		NSToolbarSeparatorItemIdentifier, RemoveToolbarIdentifier]
 	}
 	
-	override func validateToolbarItem(theItem: NSToolbarItem) -> Bool {
+	override func validateToolbarItem(_ theItem: NSToolbarItem) -> Bool {
 		return true
 	}
 }
