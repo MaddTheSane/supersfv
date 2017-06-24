@@ -35,7 +35,9 @@ private let ChecksumToolbarIdentifier		= "Checksum Toolbar Identifier"
 private let StopToolbarIdentifier			= "Stop Toolbar Identifier"
 private let SaveToolbarIdentifier			= "Save Toolbar Identifier"
 
-let kRemoveRecordFromList = "RM_RECORD_FROM_LIST"
+var kRemoveRecordFromList: NSNotification.Name {
+	return NSNotification.Name(rawValue: "RM_RECORD_FROM_LIST")
+}
 
 private var applicationVersion: String {
 	let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
@@ -100,7 +102,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		setupToolbar()
 		
 		// selecting items in our table view and pressing the delete key
-		NotificationCenter.default.addObserver(self, selector: #selector(SPSuperSFV.removeSelectedRecords(_:)), name: NSNotification.Name(rawValue: kRemoveRecordFromList), object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(SPSuperSFV.removeSelectedRecords(_:)), name: kRemoveRecordFromList, object: nil)
 		
 		// register for drag and drop on the table view
 		tableViewFileList.register(forDraggedTypes: [NSFilenamesPboardType])
@@ -407,7 +409,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	// MARK: private methods
-	fileprivate func queueEntry(_ entry: FileEntry, algorithm: SPCryptoAlgorithm = .unknown) {
+	private func queueEntry(_ entry: FileEntry, algorithm: SPCryptoAlgorithm = .unknown) {
 		let integrityOp = SPIntegrityOperation(fileEntry: entry, target: self, algorithm: algorithm)
 		
 		queue.addOperation(integrityOp)
@@ -469,7 +471,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		tableViewFileList.scrollRowToVisible(records.count - 1)
 	}
 	
-	fileprivate func startProcessingQueue() {
+	private func startProcessingQueue() {
 		progressBar.isIndeterminate = true
 		progressBar.isHidden = false
 		progressBar.startAnimation(self)
@@ -478,7 +480,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		statusField.isHidden = false
 	}
 	
-	fileprivate func stopProcessingQueue() {
+	private func stopProcessingQueue() {
 		progressBar.stopAnimation(self)
 		progressBar.isHidden = true
 		buttonStop?.isEnabled = false
@@ -488,7 +490,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	/// Called periodically for updating the UI
-	@objc fileprivate func updateProgress(_ timer: Timer) {
+	@objc private func updateProgress(_ timer: Timer) {
 		if queue.operationCount == 0 {
 			timer.invalidate()
 			updateProgressTimer = nil
