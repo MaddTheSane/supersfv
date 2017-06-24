@@ -16,7 +16,7 @@ typedef uint32_t crc32_t;
 
 #define crc32 uulib_crc32
 
-/*
+/*!
      Update a running crc with the bytes buf[0..len-1] and return the updated
    crc. If buf is NULL, this function returns the required initial value
    for the crc. Pre- and post-conditioning (one's complement) is performed

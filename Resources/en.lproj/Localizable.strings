@@ -1,0 +1,28 @@
+/* 
+  Localizable.strings
+  SuperSFV
+
+  Created by C.W. Betts on 6/24/17.
+
+*/
+
+"License file not found!" = "License file not found ☹️";
+"Add files or folder contents" = "Add files or folder contents";
+ "Confirm Removal" = "Confirm Removal";
+"Are you sure you want to remove all entries?" = "You sure you want to ditch all of the entries? They're so cute!";
+"Remove" = "Remove";
+"Remove All" = "Remove All";
+"Cancel" = "Cancel";
+"Missing" = "Missing";
+"Unknown" = "Unknown";
+"Stop" = "Stop";
+"Checksum" = "Checksum";
+"Save" = "Save";
+"Unknown (not recognized)" = "Unknown (not recognized)";
+"Add" = "Add";
+
+"Add a file or the contents of a folder" = "Add a file or the contents of a folder";
+"Remove selected items or prompt to remove all items if none are selected" = "Remove selected items or prompt to remove all items if none are selected";
+"Stop calculating checksums" = "Stop calculating checksums";
+"Save current state" = "Save current state";
+"Checksum algorithm to use" = "Checksum algorithm to use";

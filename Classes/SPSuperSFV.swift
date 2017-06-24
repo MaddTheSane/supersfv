@@ -140,8 +140,8 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	// MARK: IBActions
 	@IBAction func addClicked(_ sender: AnyObject) {
 		let oPanel = NSOpenPanel()
-		oPanel.prompt = "Add"
-		oPanel.title = "Add files or folder contents"
+		oPanel.prompt = NSLocalizedString("Add", comment: "Add");
+		oPanel.title = NSLocalizedString("Add files or folder contents", comment: "Add files or folder contents") 
 		oPanel.allowsMultipleSelection = true
 		oPanel.canChooseFiles = true
 		oPanel.canChooseDirectories = true
@@ -163,10 +163,10 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	@IBAction func removeClicked(_ sender: AnyObject?) {
 		if tableViewFileList.numberOfSelectedRows == 0 && records.count > 0 {
 			let alert = NSAlert()
-			alert.messageText = "Confirm Removal"
-			alert.informativeText = "You sure you want to ditch all of the entries? They're so cute!"
-			alert.addButton(withTitle: "Remove All")
-			alert.addButton(withTitle: "Cancel")
+			alert.messageText = NSLocalizedString("Confirm Removal", comment: "Confirm Removal")
+			alert.informativeText = NSLocalizedString("Are you sure you want to remove all entries?", comment: "You sure you want to ditch all of the entries? They're so cute!")
+			alert.addButton(withTitle: NSLocalizedString("Remove All", comment: "Remove All"))
+			alert.addButton(withTitle: NSLocalizedString("Cancel", comment: "Cancel"))
 			
 			alert.beginSheetModal(for: windowMain, completionHandler: { (returnCode) -> Void in
 				if returnCode == NSAlertFirstButtonReturn {
@@ -186,8 +186,6 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		}
 		
 		let sPanel = NSSavePanel()
-		sPanel.prompt = "Save"
-		sPanel.title = "Save"
 		sPanel.allowedFileTypes = ["sfv"]
 
 		sPanel.beginSheetModal(for: windowMain) { (result) -> Void in
@@ -219,10 +217,11 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	
 	@IBAction func showLicense(_ sender: AnyObject?) {
 		if let licenseURL = Bundle.main.url(forResource: "License", withExtension: "txt") {
-			textViewLicense.string = (try! NSString(contentsOf: licenseURL, usedEncoding: nil)) as String
+			var usedEnc = String.Encoding.utf8
+			textViewLicense.string = (try! String(contentsOf: licenseURL, usedEncoding: &usedEnc))
 		} else {
 			//TODO: rtf support in the future?
-			textViewLicense.string = "License file not found!"
+			textViewLicense.string = NSLocalizedString("License file not found!", comment: "License file not found!")
 		}
 		
 		windowAbout.beginSheet(licensePanel, completionHandler: nil)
@@ -290,14 +289,14 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				// file doesn't exist...
 				if !(newURL as NSURL).checkResourceIsReachableAndReturnError(nil) {
 					newEntry.status = .fileNotFound
-					newEntry.result = "Missing"
+					newEntry.result =  NSLocalizedString("Missing", comment: "Missing")
 					errc += 1
 				}
 				
 				// length doesn't match CRC32, MD5 or SHA-1 respectively
 				if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
-					newEntry.status = .unknownChecksum;
-					newEntry.expected = "Unknown";
+					newEntry.status = .unknownChecksum
+					newEntry.expected = NSLocalizedString("Unknown", comment: "Unknown")
 					errc += 1;
 				}
 				
@@ -325,10 +324,10 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 
 			let entry = entry1.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 			if entry == "" {
-				continue
+				continue // skip blank lines
 			}
 			if entry.characters.first == ";" {
-				continue; // skip the line if it's a comment
+				continue // skip the line if it's a comment
 			}
 			guard let r = entry.rangeOfCharacter(from: CharacterSet(charactersIn: " "), options: .backwards) else {
 				continue
@@ -341,14 +340,14 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 			// file doesn't exist...
 			if !FileManager.default.fileExists(atPath: newPath) {
 				newEntry.status = .fileNotFound
-				newEntry.result = "Missing"
+				newEntry.result = NSLocalizedString("Missing", comment: "Missing")
 				errc += 1
 			}
 			
 			// length doesn't match CRC32, MD5 or SHA-1 respectively
 			if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
 				newEntry.status = .unknownChecksum;
-				newEntry.expected = "Unknown";
+				newEntry.expected = NSLocalizedString("Unknown", comment: "Unknown")
 				errc += 1;
 			}
 			
@@ -398,7 +397,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	/// process files dropped on the tableview, icon, or are manually opened
-	func processFiles(_ fileNames: [String]) {
+	private func processFiles(_ fileNames: [String]) {
 		
 		processFileURLs(fileNames.map({ (aPath) -> URL in
 			return URL(fileURLWithPath: aPath)
@@ -516,13 +515,13 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 			
 		case "expected":
 			if newEntry.status == .unknownChecksum {
-				return "Unknown (not recognized)"
+				return NSLocalizedString("Unknown (not recognized)", comment: "Unknown (not recognized)")
 			}
 			return newEntry.expected
 			
 		case "result":
 			if newEntry.status == .fileNotFound {
-				return "Missing"
+				return NSLocalizedString("Missing", comment: "Missing")
 			}
 			return newEntry.result
 			
@@ -602,9 +601,9 @@ extension SPSuperSFV: NSToolbarDelegate {
 		switch itemIdentifier {
 		case AddToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
-			toolbarItem!.label = "Add"
-			toolbarItem!.paletteLabel = "Add"
-			toolbarItem!.toolTip = "Add a file or the contents of a folder"
+			toolbarItem!.label = NSLocalizedString("Add", comment: "Add")
+			toolbarItem!.paletteLabel = NSLocalizedString("Add", comment: "Add")
+			toolbarItem!.toolTip = NSLocalizedString("Add a file or the contents of a folder", comment: "Add a file or the contents of a folder")
 			toolbarItem!.image = NSImage(named: "edit_add")
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.addClicked(_:))
@@ -612,9 +611,9 @@ extension SPSuperSFV: NSToolbarDelegate {
 
 		case RemoveToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
-			toolbarItem!.label = "Remove"
-			toolbarItem!.paletteLabel = "Remove"
-			toolbarItem!.toolTip = "Remove selected items or prompt to remove all items if none are selected"
+			toolbarItem!.label = NSLocalizedString("Remove", comment: "Remove") 
+			toolbarItem!.paletteLabel = NSLocalizedString("Remove", comment: "Remove")
+			toolbarItem!.toolTip = NSLocalizedString("Remove selected items or prompt to remove all items if none are selected", comment: "Remove selected items or prompt to remove all items if none are selected")
 			toolbarItem!.image = NSImage(named: "edit_remove")
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.removeClicked(_:))
@@ -632,9 +631,9 @@ extension SPSuperSFV: NSToolbarDelegate {
 
 		case StopToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
-			toolbarItem!.label = "Stop"
-			toolbarItem!.paletteLabel = "Stop"
-			toolbarItem!.toolTip = "Stop calculating checksums"
+			toolbarItem!.label = NSLocalizedString("Stop", comment: "Stop")
+			toolbarItem!.paletteLabel = NSLocalizedString("Stop", comment: "Stop")
+			toolbarItem!.toolTip = NSLocalizedString("Stop calculating checksums", comment: "Stop calculating checksums")
 			toolbarItem!.image = NSImage(named: "stop")
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.stopClicked(_:))
@@ -642,9 +641,9 @@ extension SPSuperSFV: NSToolbarDelegate {
 
 		case SaveToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
-			toolbarItem!.label = "Save"
-			toolbarItem!.paletteLabel = "Save"
-			toolbarItem!.toolTip = "Save current state"
+			toolbarItem!.label = NSLocalizedString("Save", comment: "Save")
+			toolbarItem!.paletteLabel = NSLocalizedString("Save", comment: "Save")
+			toolbarItem!.toolTip = NSLocalizedString("Save current state", comment: "Save current state")
 			toolbarItem!.image = NSImage(named: "1downarrow")
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.saveClicked(_:))
@@ -652,9 +651,9 @@ extension SPSuperSFV: NSToolbarDelegate {
 
 		case ChecksumToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
-			toolbarItem!.label = "Checksum"
-			toolbarItem!.paletteLabel = "Checksum"
-			toolbarItem!.toolTip = "Checksum algorithm to use"
+			toolbarItem!.label = NSLocalizedString("Checksum", comment: "Checksum")
+			toolbarItem!.paletteLabel = NSLocalizedString("Checksum", comment: "Checksum")
+			toolbarItem!.toolTip = NSLocalizedString("Checksum algorithm to use", comment: "Checksum algorithm to use")
 			toolbarItem!.view = viewChecksum
 			toolbarItem!.minSize = NSSize(width: 106, height: viewChecksum.frame.height)
 			toolbarItem!.maxSize = NSSize(width: 106, height: viewChecksum.frame.height)
