@@ -30,31 +30,31 @@ final class IntegrityOperation: Operation {
 	}
 
 	override func main() {
-			print("Running for file \(fileEntry.filePath)")
-			guard !isCancelled else {
-				return
+		print("Running for file \(fileEntry.filePath)")
+		guard !isCancelled else {
+			return
+		}
+		
+		let algorithm: CryptoAlgorithm
+		
+		let expectedHash = fileEntry.expected
+		if cryptoAlgorithm == .Unknown {
+			switch expectedHash.characters.count {
+			case 8:
+				algorithm = .CRC
+				
+			case 32:
+				algorithm = .MD5
+				
+			case 40:
+				algorithm = .SHA1
+				
+			default:
+				algorithm = .CRC
 			}
-			
-			let algorithm: CryptoAlgorithm
-			
-			let expectedHash = fileEntry.expected
-			if cryptoAlgorithm == .Unknown {
-				switch expectedHash.characters.count {
-				case 8:
-					algorithm = .CRC
-					
-				case 32:
-					algorithm = .MD5
-					
-				case 40:
-					algorithm = .SHA1
-					
-				default:
-					algorithm = .CRC
-				}
-			} else {
-				algorithm = cryptoAlgorithm
-			}
+		} else {
+			algorithm = cryptoAlgorithm
+		}
 		
 		var crc: crc32_t = 0
 		var md5_ctx = CC_MD5_CTX()
@@ -81,8 +81,8 @@ final class IntegrityOperation: Operation {
 			autoreleasepool() {
 				var fileData = fileHandle.readData(ofLength: 65536)
 				repeat {
-					if isCancelled {
-						break
+					guard !isCancelled else {
+						return
 					}
 					
 					switch algorithm {
@@ -115,28 +115,28 @@ final class IntegrityOperation: Operation {
 			}
 		}
 		
-			if algorithm == .CRC {
-				hashString = String(format: "%08X", crc)
-			} else {
-				var dgst = [UInt8](repeating: 0, count: algorithm == .MD5 ? Int(CC_MD5_DIGEST_LENGTH) : Int(CC_SHA1_DIGEST_LENGTH))
-				switch algorithm {
-				case .SHA1:
-					CC_SHA1_Final(&dgst, &sha_ctx)
-					
-				case .MD5:
-					CC_MD5_Final(&dgst, &md5_ctx)
-					
-				default:
-					break
-				}
+		if algorithm == .CRC {
+			hashString = String(format: "%08X", crc)
+		} else {
+			var dgst = [UInt8](repeating: 0, count: algorithm == .MD5 ? Int(CC_MD5_DIGEST_LENGTH) : Int(CC_SHA1_DIGEST_LENGTH))
+			switch algorithm {
+			case .SHA1:
+				CC_SHA1_Final(&dgst, &sha_ctx)
 				
-				var tmpHash = ""
-				for i in dgst {
-					tmpHash += String(format: "%02X", i)
-				}
-				hashString = tmpHash
+			case .MD5:
+				CC_MD5_Final(&dgst, &md5_ctx)
+				
+			default:
+				break
 			}
 			
-			fileEntry.result = hashString!
+			var tmpHash = ""
+			for i in dgst {
+				tmpHash += String(format: "%02X", i)
+			}
+			hashString = tmpHash
+		}
+		
+		fileEntry.result = hashString!
 	}
 }
