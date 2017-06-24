@@ -55,14 +55,15 @@ final class IntegrityOperation: Operation {
 			} else {
 				algorithm = cryptoAlgorithm
 			}
-			
-			guard var fileHandle = try? FileHandle(forReadingFrom: fileEntry.fileURL) else {
+		
+		var crc: crc32_t = 0
+		var md5_ctx = CC_MD5_CTX()
+		var sha_ctx = CC_SHA1_CTX()
+		
+		do {
+			guard let fileHandle = try? FileHandle(forReadingFrom: fileEntry.fileURL) else {
 				return
 			}
-			
-			var crc: crc32_t = 0
-			var md5_ctx = CC_MD5_CTX()
-			var sha_ctx = CC_SHA1_CTX()
 			
 			switch algorithm {
 			case .CRC:
@@ -112,9 +113,8 @@ final class IntegrityOperation: Operation {
 			guard !isCancelled else {
 				return
 			}
-			
-			fileHandle = .nullDevice
-			
+		}
+		
 			if algorithm == .CRC {
 				hashString = String(format: "%08X", crc)
 			} else {
