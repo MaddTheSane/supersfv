@@ -3,5 +3,5 @@
 //
 
 #include "crc32.h"
-#include <CommonCrypto/CommonCrypto.h>
+#include <CommonCrypto/CommonDigest.h>
 #import "SPIntegrityOperation.h"

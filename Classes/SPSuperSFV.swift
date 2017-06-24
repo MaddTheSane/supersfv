@@ -261,11 +261,12 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		NSWorkspace.shared().open(URL(string: "mailto:reikonmusha@gmail.com")!)
 	}
 	
-	@objc(parseSFVFileAtFileURL:) func parseSFVFile(_ fileURL: URL) {
+	@objc(parseSFVFileAtFileURL:) func parseSFVFile(at fileURL: URL) {
 		let thisBaseURL = fileURL.deletingLastPathComponent()
 		baseURL = thisBaseURL
 		do {
-			let rawContents = try NSString(contentsOf: fileURL, usedEncoding: nil)
+			var enc = String.Encoding.utf8
+			let rawContents = try String(contentsOf: fileURL, usedEncoding: &enc)
 			let contents = rawContents.components(separatedBy: CharacterSet.newlines)
 			for entry1 in contents {
 				var errc = 0 //error count
@@ -317,8 +318,9 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		
 	}
 	
-	@objc(parseSFVFileAtFilePath:) func parseSFVFile(_ filePath: String) {
-		let contents = (try! NSString(contentsOfFile: filePath, usedEncoding: nil)).components(separatedBy: "\n")
+	@objc(parseSFVFileAtFilePath:) func parseSFVFile(atPath filePath: String) {
+		var enc = String.Encoding.utf8
+		let contents = (try! String(contentsOfFile: filePath, usedEncoding: &enc)).components(separatedBy: "\n")
 		for entry1 in contents {
 			var errc = 0 //error count
 
@@ -379,7 +381,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 			if pathExt.lowercased() == "sfv" {
 				let isDirDict = try? url.resourceValues(forKeys: [.fileResourceTypeKey])
 				if let aDir = isDirDict?.fileResourceType, aDir != URLFileResourceType.directory {
-					parseSFVFile(url)
+					parseSFVFile(at: url)
 					continue
 				}
 			}

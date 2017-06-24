@@ -20,7 +20,7 @@
 #import "SPIntegrityOperation.h"
 #import "SuperSFV-Swift.h"
 
-#include <CommonCrypto/CommonCrypto.h>
+#include <CommonCrypto/CommonDigest.h>
 #include "crc32.h"
 
 @implementation SPIntegrityOperation
