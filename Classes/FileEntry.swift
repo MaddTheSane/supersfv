@@ -30,7 +30,7 @@ import AppKit.NSImage
 
 
 class FileEntry : NSObject {
-	@objc enum FileStatus : Int {
+	@objc(FileStatus) enum Status : Int {
 		case unknown = 0
 		case checking
 		case valid
@@ -39,7 +39,7 @@ class FileEntry : NSObject {
 		case unknownChecksum = -1
 	}
 	
-	class func image(forStatus status: FileStatus) -> NSImage? {
+	class func image(forStatus status: Status) -> NSImage? {
 		switch (status) {
 		case .checking:
 			return NSImage(named: NSImageNameStatusPartiallyAvailable)
@@ -58,7 +58,7 @@ class FileEntry : NSObject {
 		}
 	}
 	
-	var status = FileStatus.unknown
+	var status = Status.unknown
 	let fileURL: URL
 	var filePath: String {
 		return fileURL.path
