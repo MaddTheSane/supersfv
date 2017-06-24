@@ -39,7 +39,7 @@ class FileEntry : NSObject {
 		case unknownChecksum = -1
 	}
 	
-	class func imageForStatus(_ status: FileStatus) -> NSImage? {
+	class func image(forStatus status: FileStatus) -> NSImage? {
 		switch (status) {
 		case .checking:
 			return NSImage(named: NSImageNameStatusPartiallyAvailable)

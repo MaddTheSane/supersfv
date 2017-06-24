@@ -142,7 +142,7 @@
             return;
         
         if (algorithm == SPCryptoAlgorithmCRC) {
-            hash = [[NSString stringWithFormat:@"%08x", hashCtx.crc] uppercaseString];
+            hash = [[NSString alloc] initWithFormat:@"%08X", hashCtx.crc];
         } else {
             hash = @"";
             dgst = (uint8_t *) calloc (((algorithm == SPCryptoAlgorithmMD5) ? 32 : 40), sizeof(uint8_t));
@@ -161,7 +161,7 @@
             }
             
             for (int i = 0; i < ((algorithm == SPCryptoAlgorithmMD5)?16:20); i++)
-                hash = [[hash stringByAppendingFormat:@"%02x", dgst[i]] uppercaseString];
+                hash = [hash stringByAppendingFormat:@"%02X", dgst[i]];
             
             free(dgst);
         }

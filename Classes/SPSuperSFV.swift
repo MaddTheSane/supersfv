@@ -397,7 +397,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	/// process files dropped on the tableview, icon, or are manually opened
-	private func processFiles(_ fileNames: [String]) {
+	fileprivate func processFiles(_ fileNames: [String]) {
 		
 		processFileURLs(fileNames.map({ (aPath) -> URL in
 			return URL(fileURLWithPath: aPath)
@@ -511,7 +511,7 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 			return newEntry.fileURL.lastPathComponent
 			
 		case "status":
-			return FileEntry.imageForStatus(newEntry.status)
+			return FileEntry.image(forStatus: newEntry.status)
 			
 		case "expected":
 			if newEntry.status == .unknownChecksum {
