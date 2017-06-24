@@ -9,7 +9,7 @@
 import Cocoa
 
 
-class IntegrityOperation: NSOperation {
+final class IntegrityOperation: Operation {
 	enum CryptoAlgorithm : Int32 {
 		case Unknown = -1
 		case CRC = 0
@@ -31,13 +31,12 @@ class IntegrityOperation: NSOperation {
 
 	override func main() {
 			print("Running for file \(fileEntry.filePath)")
-			guard !cancelled else {
+			guard !isCancelled else {
 				return
 			}
 			
 			let algorithm: CryptoAlgorithm
 			
-			let file = fileEntry.filePath
 			let expectedHash = fileEntry.expected
 			if cryptoAlgorithm == .Unknown {
 				switch expectedHash.characters.count {
@@ -57,9 +56,7 @@ class IntegrityOperation: NSOperation {
 				algorithm = cryptoAlgorithm
 			}
 			
-			var fileHandle = NSFileHandle(forReadingAtPath: file)
-			
-			if fileHandle == nil {
+			guard var fileHandle = try? FileHandle(forReadingFrom: fileEntry.fileURL) else {
 				return
 			}
 			
@@ -81,42 +78,47 @@ class IntegrityOperation: NSOperation {
 				break
 			}
 			autoreleasepool() {
-				var fileData = NSData()
-				fileData = fileHandle!.readDataOfLength(65536)
+				var fileData = fileHandle.readData(ofLength: 65536)
 				repeat {
-					if cancelled {
+					if isCancelled {
 						break
 					}
 					
 					switch algorithm {
 					case .CRC:
-						crc = uulib_crc32(crc, UnsafePointer<UInt8>(fileData.bytes), fileData.length)
+						crc = fileData.withUnsafeBytes({ (f: UnsafePointer<UInt8>) -> crc32_t in
+							return uulib_crc32(crc, f, fileData.count)
+						})
 						
 					case .MD5:
-						CC_MD5_Update(&md5_ctx, fileData.bytes, CC_LONG(fileData.length))
+						fileData.withUnsafeBytes({ (f: UnsafePointer<UInt8>) -> Void in
+							CC_MD5_Update(&md5_ctx, f, CC_LONG(fileData.count))
+						})
 						
 					case .SHA1:
-						CC_SHA1_Update(&sha_ctx, fileData.bytes, CC_LONG(fileData.length))
+						fileData.withUnsafeBytes({ (f: UnsafePointer<UInt8>) -> Void in
+							CC_SHA1_Update(&sha_ctx, f, CC_LONG(fileData.count))
+						})
 						
 					default:
 						break
 						
 					}
-					fileData = fileHandle!.readDataOfLength(65536)
-				} while fileData.length > 0
+					fileData = fileHandle.readData(ofLength: 65536)
+				} while fileData.count > 0
 				NSLog("Finished with file %@", fileEntry.filePath);
 			}
 			
-			if cancelled {
+			guard !isCancelled else {
 				return
 			}
 			
-			fileHandle = nil
+			fileHandle = .nullDevice
 			
 			if algorithm == .CRC {
-				hashString = String(format: "%08x", crc).uppercaseString
+				hashString = String(format: "%08X", crc)
 			} else {
-				var dgst = [UInt8](count: algorithm == .MD5 ? Int(CC_MD5_DIGEST_LENGTH) : Int(CC_SHA1_DIGEST_LENGTH), repeatedValue: 0)
+				var dgst = [UInt8](repeating: 0, count: algorithm == .MD5 ? Int(CC_MD5_DIGEST_LENGTH) : Int(CC_SHA1_DIGEST_LENGTH))
 				switch algorithm {
 				case .SHA1:
 					CC_SHA1_Final(&dgst, &sha_ctx)
@@ -130,7 +132,7 @@ class IntegrityOperation: NSOperation {
 				
 				var tmpHash = ""
 				for i in dgst {
-					tmpHash += String(format: "%02x", i).uppercaseString
+					tmpHash += String(format: "%02X", i)
 				}
 				hashString = tmpHash
 			}
