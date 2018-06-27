@@ -58,7 +58,7 @@ class FileEntry : NSObject {
 		}
 	}
 	
-	var status = Status.unknown
+	@objc var status = Status.unknown
 	@objc let fileURL: URL
 	@objc var filePath: String {
 		return fileURL.path

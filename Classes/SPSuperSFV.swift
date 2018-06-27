@@ -197,10 +197,35 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				// shameless plug to start out with
 				var output = "; Created using SuperSFV v\(applicationVersion) on Mac OS X\n"
 
+				let baseURL = sPanel.url!.deletingLastPathComponent()
+				let baseComponents = baseURL.pathComponents
 				for entry in self.records {
 					switch entry.status {
 					case .valid, .invalid:
-						output += "\((entry.filePath as NSString).lastPathComponent) \(entry.result)\n"
+						let aURL = entry.fileURL
+						let comps = aURL.pathComponents
+						
+						let zipped = zip(baseComponents, comps)
+						var i = 0
+						for (base, path) in zipped {
+							i += 1
+							if base != path {
+								break
+							}
+						}
+						
+						let addDir = comps[i ..< comps.count]
+						let dotDotCount = baseComponents.count - i
+						var outPath = ""
+						for _ in 0 ..< dotDotCount {
+							outPath += "../"
+						}
+						for pathComp in addDir {
+							outPath = (outPath as NSString).appendingPathComponent(pathComp)
+						}
+						
+						output += "\(outPath) \(entry.result)\n"
+						
 					default:
 						continue
 					}
@@ -532,13 +557,14 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 		}
 		
 		tableViewFileList.highlightedTableColumn = tableColumn
+		let sortDes = tableColumn.sortDescriptorPrototype ?? NSSortDescriptor(key: tableColumn.identifier.rawValue, ascending: true)
 		
 		if tableViewFileList.indicatorImage(in: tableColumn) != NSImage(named: NSImage.Name(rawValue: "NSAscendingSortIndicator")) {
 			tableViewFileList.setIndicatorImage(NSImage(named: NSImage.Name(rawValue: "NSAscendingSortIndicator")), in: tableColumn)
-			sortWithDescriptor(NSSortDescriptor(key: tableColumn.identifier.rawValue, ascending: true))
+			sortWithDescriptor(NSSortDescriptor(key: sortDes.key, ascending: true, selector: sortDes.selector))
 		} else {
 			tableViewFileList.setIndicatorImage(NSImage(named: NSImage.Name(rawValue: "NSDescendingSortIndicator")), in: tableColumn)
-			sortWithDescriptor(NSSortDescriptor(key: tableColumn.identifier.rawValue, ascending: false))
+			sortWithDescriptor(NSSortDescriptor(key: sortDes.key, ascending: false, selector: sortDes.selector))
 		}
 	}
 	
