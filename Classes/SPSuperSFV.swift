@@ -27,13 +27,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 import Cocoa
 
-private let SuperSFVToolbarIdentifier		= "SuperSFV Toolbar Identifier"
-private let AddToolbarIdentifier			= "Add Toolbar Identifier"
-private let RemoveToolbarIdentifier			= "Remove Toolbar Identifier"
-private let RecalculateToolbarIdentifier	= "Recalculate Toolbar Identifier"
-private let ChecksumToolbarIdentifier		= "Checksum Toolbar Identifier"
-private let StopToolbarIdentifier			= "Stop Toolbar Identifier"
-private let SaveToolbarIdentifier			= "Save Toolbar Identifier"
+private let superSFVToolbarIdentifier		= NSToolbar.Identifier("SuperSFV Toolbar Identifier")
+private let addToolbarIdentifier			= NSToolbarItem.Identifier("Add Toolbar Identifier")
+private let removeToolbarIdentifier			= NSToolbarItem.Identifier("Remove Toolbar Identifier")
+private let recalculateToolbarIdentifier	= NSToolbarItem.Identifier("Recalculate Toolbar Identifier")
+private let checksumToolbarIdentifier		= NSToolbarItem.Identifier("Checksum Toolbar Identifier")
+private let stopToolbarIdentifier			= NSToolbarItem.Identifier("Stop Toolbar Identifier")
+private let saveToolbarIdentifier			= NSToolbarItem.Identifier("Save Toolbar Identifier")
 
 var kRemoveRecordFromList: NSNotification.Name {
 	return NSNotification.Name(rawValue: "RM_RECORD_FROM_LIST")
@@ -93,7 +93,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	override init() {
 		var dictionary = [String: Any]()
 		dictionary["checksum_algorithm"] = "CRC32"; // default for most SFV programs
-		NSUserDefaultsController.shared().initialValues = dictionary
+		NSUserDefaultsController.shared.initialValues = dictionary
 		UserDefaults.standard.register(defaults: dictionary)
 		super.init()
 	}
@@ -105,7 +105,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		NotificationCenter.default.addObserver(self, selector: #selector(SPSuperSFV.removeSelectedRecords(_:)), name: kRemoveRecordFromList, object: nil)
 		
 		// register for drag and drop on the table view
-		tableViewFileList.register(forDraggedTypes: [NSFilenamesPboardType])
+		tableViewFileList.registerForDraggedTypes([NSPasteboard.PasteboardType(rawValue: kUTTypeFileURL as String)])
 		
 		// make the window pertee and show it
 		buttonStop?.isEnabled = false
@@ -148,7 +148,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		oPanel.canChooseFiles = true
 		oPanel.canChooseDirectories = true
 		oPanel.beginSheetModal(for: windowMain) { (result) -> Void in
-			if result == NSModalResponseOK {
+			if result == NSApplication.ModalResponse.OK {
 				let urls = oPanel.urls
 				self.processFileURLs(urls)
 			}
@@ -171,7 +171,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 			alert.addButton(withTitle: NSLocalizedString("Cancel", comment: "Cancel"))
 			
 			alert.beginSheetModal(for: windowMain, completionHandler: { (returnCode) -> Void in
-				if returnCode == NSAlertFirstButtonReturn {
+				if returnCode == NSApplication.ModalResponse.alertFirstButtonReturn {
 					self.records.removeAll(keepingCapacity: false)
 					self.updateUI()
 				}
@@ -183,7 +183,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	
 	@IBAction func saveClicked(_ sender: AnyObject?) {
 		if records.count == 0 {
-			NSBeep()
+			NSSound.beep()
 			return
 		}
 		
@@ -191,7 +191,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		sPanel.allowedFileTypes = ["sfv"]
 
 		sPanel.beginSheetModal(for: windowMain) { (result) -> Void in
-			if result == NSModalResponseOK {
+			if result == NSApplication.ModalResponse.OK {
 				// shameless plug to start out with
 				var output = "; Created using SuperSFV v\(applicationVersion) on Mac OS X\n"
 
@@ -260,7 +260,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	@IBAction func contactClicked(_ sender: AnyObject?) {
-		NSWorkspace.shared().open(URL(string: "mailto:reikonmusha@gmail.com")!)
+		NSWorkspace.shared.open(URL(string: "mailto:reikonmusha@gmail.com")!)
 	}
 	
 	@objc(parseSFVFileAtFileURL:) func parseSFVFile(at fileURL: URL) {
@@ -277,17 +277,17 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				if entry == "" {
 					continue
 				}
-				if entry.characters.first == ";" {
+				if entry.first == ";" {
 					continue; // skip the line if it's a comment
 				}
 				guard let r = entry.rangeOfCharacter(from: CharacterSet(charactersIn: " "), options: .backwards) else {
 					continue
 				}
-				let newURL = URL(string: entry[entry.startIndex..<r.lowerBound], relativeTo: fileURL)!
+				let newURL = URL(string: String(entry[entry.startIndex..<r.lowerBound]), relativeTo: fileURL)!
 				//let newURL = thisBaseURL.URLByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
 				let hash = entry[r.upperBound ..< entry.endIndex]
 				
-				let newEntry = FileEntry(fileURL: newURL, expectedHash: hash)
+				let newEntry = FileEntry(fileURL: newURL, expectedHash: String(hash))
 				
 				// file doesn't exist...
 				if !(newURL as NSURL).checkResourceIsReachableAndReturnError(nil) {
@@ -297,7 +297,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				}
 				
 				// length doesn't match CRC32, MD5 or SHA-1 respectively
-				if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
+				if hash.count != 8 && hash.count != 32 && hash.count != 40 {
 					newEntry.status = .unknownChecksum
 					newEntry.expected = NSLocalizedString("Unknown", comment: "Unknown")
 					errc += 1;
@@ -315,7 +315,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				queueEntry(newEntry)
 			}
 		} catch _ {
-			NSBeep()
+			NSSound.beep()
 		}
 		
 	}
@@ -330,16 +330,16 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 			if entry == "" {
 				continue // skip blank lines
 			}
-			if entry.characters.first == ";" {
+			if entry.first == ";" {
 				continue // skip the line if it's a comment
 			}
 			guard let r = entry.rangeOfCharacter(from: CharacterSet(charactersIn: " "), options: .backwards) else {
 				continue
 			}
-			let newPath = ((filePath as NSString).deletingLastPathComponent as NSString).appendingPathComponent(entry[entry.startIndex..<r.lowerBound])
+			let newPath = ((filePath as NSString).deletingLastPathComponent as NSString).appendingPathComponent(String(entry[entry.startIndex..<r.lowerBound]))
 			let hash = entry[r.upperBound ..< entry.endIndex]
 			
-			let newEntry = FileEntry(path: newPath, expectedHash: hash)
+			let newEntry = FileEntry(path: newPath, expectedHash: String(hash))
 			
 			// file doesn't exist...
 			if !FileManager.default.fileExists(atPath: newPath) {
@@ -349,7 +349,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 			}
 			
 			// length doesn't match CRC32, MD5 or SHA-1 respectively
-			if hash.characters.count != 8 && hash.characters.count != 32 && hash.characters.count != 40 {
+			if hash.count != 8 && hash.count != 32 && hash.count != 40 {
 				newEntry.status = .unknownChecksum;
 				newEntry.expected = NSLocalizedString("Unknown", comment: "Unknown")
 				errc += 1;
@@ -376,7 +376,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				continue
 			}
 			let lastPathComp = url.lastPathComponent
-				if lastPathComp.characters.first == "." {
+				if lastPathComp.first == "." {
 					continue // ignore hidden files
 				}
 			let pathExt = url.pathExtension
@@ -511,19 +511,19 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 		let newEntry = records[row]
 		
 		switch key {
-		case "filepath":
+		case NSUserInterfaceItemIdentifier("filepath"):
 			return newEntry.fileURL.lastPathComponent
 			
-		case "status":
+		case NSUserInterfaceItemIdentifier("status"):
 			return FileEntry.image(forStatus: newEntry.status)
 			
-		case "expected":
+		case NSUserInterfaceItemIdentifier("expected"):
 			if newEntry.status == .unknownChecksum {
 				return NSLocalizedString("Unknown (not recognized)", comment: "Unknown (not recognized)")
 			}
 			return newEntry.expected
 			
-		case "result":
+		case NSUserInterfaceItemIdentifier("result"):
 			if newEntry.status == .fileNotFound {
 				return NSLocalizedString("Missing", comment: "Missing")
 			}
@@ -540,17 +540,17 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 		return records.count
 	}
 	
-	func tableView(_ tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int, proposedDropOperation dropOperation: NSTableViewDropOperation) -> NSDragOperation {
+	func tableView(_ tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int, proposedDropOperation dropOperation: NSTableView.DropOperation) -> NSDragOperation {
 		return .every
 	}
 	
-	func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableViewDropOperation) -> Bool {
+	func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableView.DropOperation) -> Bool {
 		let pboard = info.draggingPasteboard()
-		guard let files = pboard.propertyList(forType: NSFilenamesPboardType) as? NSArray as? [String] else {
+		guard let files = pboard.propertyList(forType: NSPasteboard.PasteboardType(kUTTypeFileURL as String)) as? NSArray as? [URL] else {
 			return false
 		}
 		
-		processFiles(files)
+		processFiles(files.map({$0.path}))
 		
 		return true
 	}
@@ -569,12 +569,12 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 		
 		tableViewFileList.highlightedTableColumn = tableColumn
 		
-		if tableViewFileList.indicatorImage(in: tableColumn) != NSImage(named: "NSAscendingSortIndicator") {
-			tableViewFileList.setIndicatorImage(NSImage(named: "NSAscendingSortIndicator"), in: tableColumn)
-			sortWithDescriptor(NSSortDescriptor(key: tableColumn.identifier, ascending: true))
+		if tableViewFileList.indicatorImage(in: tableColumn) != NSImage(named: NSImage.Name(rawValue: "NSAscendingSortIndicator")) {
+			tableViewFileList.setIndicatorImage(NSImage(named: NSImage.Name(rawValue: "NSAscendingSortIndicator")), in: tableColumn)
+			sortWithDescriptor(NSSortDescriptor(key: tableColumn.identifier.rawValue, ascending: true))
 		} else {
-			tableViewFileList.setIndicatorImage(NSImage(named: "NSDescendingSortIndicator"), in: tableColumn)
-			sortWithDescriptor(NSSortDescriptor(key: tableColumn.identifier, ascending: false))
+			tableViewFileList.setIndicatorImage(NSImage(named: NSImage.Name(rawValue: "NSDescendingSortIndicator")), in: tableColumn)
+			sortWithDescriptor(NSSortDescriptor(key: tableColumn.identifier.rawValue, ascending: false))
 		}
 	}
 	
@@ -590,7 +590,7 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 // MARK: Toolbar delegate
 extension SPSuperSFV: NSToolbarDelegate {
 	fileprivate func setupToolbar() {
-		let toolbar = NSToolbar(identifier: SuperSFVToolbarIdentifier)
+		let toolbar = NSToolbar(identifier: superSFVToolbarIdentifier)
 		toolbar.allowsUserCustomization = true
 		toolbar.autosavesConfiguration = true
 		toolbar.displayMode = .iconOnly
@@ -600,60 +600,60 @@ extension SPSuperSFV: NSToolbarDelegate {
 		windowMain.toolbar = toolbar
 	}
 	
-	func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: String, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
+	func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
 		var toolbarItem: NSToolbarItem? = nil
 		switch itemIdentifier {
-		case AddToolbarIdentifier:
+		case addToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 			toolbarItem!.label = NSLocalizedString("Add", comment: "Add")
 			toolbarItem!.paletteLabel = NSLocalizedString("Add", comment: "Add")
 			toolbarItem!.toolTip = NSLocalizedString("Add a file or the contents of a folder", comment: "Add a file or the contents of a folder")
-			toolbarItem!.image = NSImage(named: "edit_add")
+			toolbarItem!.image = #imageLiteral(resourceName: "edit_add")
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.addClicked(_:))
 			toolbarItem!.autovalidates = false
 
-		case RemoveToolbarIdentifier:
+		case removeToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 			toolbarItem!.label = NSLocalizedString("Remove", comment: "Remove") 
 			toolbarItem!.paletteLabel = NSLocalizedString("Remove", comment: "Remove")
 			toolbarItem!.toolTip = NSLocalizedString("Remove selected items or prompt to remove all items if none are selected", comment: "Remove selected items or prompt to remove all items if none are selected")
-			toolbarItem!.image = NSImage(named: "edit_remove")
+			toolbarItem!.image = #imageLiteral(resourceName: "edit_remove")
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.removeClicked(_:))
 			toolbarItem!.autovalidates = false
 
-		case RecalculateToolbarIdentifier:
+		case recalculateToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 			toolbarItem!.label = "Recalculate"
 			toolbarItem!.paletteLabel = "Recalculate"
 			toolbarItem!.toolTip = "Recalculate checksums"
-			toolbarItem!.image = NSImage(named: "reload")
+			toolbarItem!.image = #imageLiteral(resourceName: "reload")
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.recalculateClicked(_:))
 			toolbarItem!.autovalidates = false
 
-		case StopToolbarIdentifier:
+		case stopToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 			toolbarItem!.label = NSLocalizedString("Stop", comment: "Stop")
 			toolbarItem!.paletteLabel = NSLocalizedString("Stop", comment: "Stop")
 			toolbarItem!.toolTip = NSLocalizedString("Stop calculating checksums", comment: "Stop calculating checksums")
-			toolbarItem!.image = NSImage(named: "stop")
+			toolbarItem!.image = #imageLiteral(resourceName: "stop")
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.stopClicked(_:))
 			toolbarItem!.autovalidates = false
 
-		case SaveToolbarIdentifier:
+		case saveToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 			toolbarItem!.label = NSLocalizedString("Save", comment: "Save")
 			toolbarItem!.paletteLabel = NSLocalizedString("Save", comment: "Save")
 			toolbarItem!.toolTip = NSLocalizedString("Save current state", comment: "Save current state")
-			toolbarItem!.image = NSImage(named: "1downarrow")
+			toolbarItem!.image = NSImage(named: NSImage.Name(rawValue: "1downarrow"))
 			toolbarItem!.target = self
 			toolbarItem!.action = #selector(SPSuperSFV.saveClicked(_:))
 			toolbarItem!.autovalidates = false
 
-		case ChecksumToolbarIdentifier:
+		case checksumToolbarIdentifier:
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 			toolbarItem!.label = NSLocalizedString("Checksum", comment: "Checksum")
 			toolbarItem!.paletteLabel = NSLocalizedString("Checksum", comment: "Checksum")
@@ -669,19 +669,19 @@ extension SPSuperSFV: NSToolbarDelegate {
 		return toolbarItem
 	}
 	
-	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [String] {
-		return [AddToolbarIdentifier, RemoveToolbarIdentifier,
-		RecalculateToolbarIdentifier, NSToolbarSeparatorItemIdentifier,
-		ChecksumToolbarIdentifier, NSToolbarFlexibleSpaceItemIdentifier,
-		SaveToolbarIdentifier, StopToolbarIdentifier]
+	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+		return [addToolbarIdentifier, removeToolbarIdentifier,
+		recalculateToolbarIdentifier, NSToolbarItem.Identifier.separator,
+		checksumToolbarIdentifier, NSToolbarItem.Identifier.flexibleSpace,
+		saveToolbarIdentifier, stopToolbarIdentifier]
 	}
 	
-	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [String] {
-		return [AddToolbarIdentifier, RecalculateToolbarIdentifier,
-		StopToolbarIdentifier, SaveToolbarIdentifier, ChecksumToolbarIdentifier,
-		NSToolbarPrintItemIdentifier, NSToolbarCustomizeToolbarItemIdentifier,
-		NSToolbarFlexibleSpaceItemIdentifier, NSToolbarSpaceItemIdentifier,
-		NSToolbarSeparatorItemIdentifier, RemoveToolbarIdentifier]
+	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+		return [addToolbarIdentifier, recalculateToolbarIdentifier,
+		stopToolbarIdentifier, saveToolbarIdentifier, checksumToolbarIdentifier,
+		NSToolbarItem.Identifier.print, NSToolbarItem.Identifier.customizeToolbar,
+		NSToolbarItem.Identifier.flexibleSpace, NSToolbarItem.Identifier.space,
+		NSToolbarItem.Identifier.separator, removeToolbarIdentifier]
 	}
 	
 	override func validateToolbarItem(_ theItem: NSToolbarItem) -> Bool {

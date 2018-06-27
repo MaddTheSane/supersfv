@@ -42,16 +42,16 @@ class FileEntry : NSObject {
 	class func image(forStatus status: Status) -> NSImage? {
 		switch (status) {
 		case .checking:
-			return NSImage(named: NSImageNameStatusPartiallyAvailable)
+			return NSImage(named: NSImage.Name.statusPartiallyAvailable)
 			
 		case .valid:
-			return NSImage(named: NSImageNameStatusAvailable)
+			return NSImage(named: NSImage.Name.statusAvailable)
 			
 		case .invalid:
-			return NSImage(named: NSImageNameStatusUnavailable)
+			return NSImage(named: NSImage.Name.statusUnavailable)
 			
 		case .fileNotFound, .unknownChecksum:
-			return NSImage(named: NSImageNameStatusNone)
+			return NSImage(named: NSImage.Name.statusNone)
 			
 		default:
 			return nil;
@@ -59,12 +59,12 @@ class FileEntry : NSObject {
 	}
 	
 	var status = Status.unknown
-	let fileURL: URL
-	var filePath: String {
+	@objc let fileURL: URL
+	@objc var filePath: String {
 		return fileURL.path
 	}
-	var expected: String
-	var result: String
+	@objc var expected: String
+	@objc var result: String
 	
 	convenience init(path: String) {
 		self.init(path: path, expectedHash: nil)
