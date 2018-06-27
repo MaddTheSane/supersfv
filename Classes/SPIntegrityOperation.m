@@ -28,7 +28,7 @@
 
 - (id)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object
 {
-    return [self initWithFileEntry:entry target:object algorithm:-1];
+    return self = [self initWithFileEntry:entry target:object algorithm:SPCryptoAlgorithmUnknown];
 }
 
 - (id)initWithFileEntry:(FileEntry *)entry target:(NSObject *)object algorithm:(SPCryptoAlgorithm)algorithm

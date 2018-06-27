@@ -286,7 +286,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.reikon.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SuperSFV;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/SuperSFV-Bridging-Header.h";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 				WRAPPER_EXTENSION = app;
 			};
@@ -301,7 +300,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.reikon.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SuperSFV;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/SuperSFV-Bridging-Header.h";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 				WRAPPER_EXTENSION = app;
 			};
