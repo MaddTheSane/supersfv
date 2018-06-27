@@ -519,13 +519,13 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 			
 		case NSUserInterfaceItemIdentifier("expected"):
 			if newEntry.status == .unknownChecksum {
-				return NSLocalizedString("Unknown (not recognized)", comment: "Unknown (not recognized)")
+				return NSLocalizedString("Unknown (not recognized)", comment: "Unknown (not recognized) checksum type")
 			}
 			return newEntry.expected
 			
 		case NSUserInterfaceItemIdentifier("result"):
 			if newEntry.status == .fileNotFound {
-				return NSLocalizedString("Missing", comment: "Missing")
+				return NSLocalizedString("Missing", comment: "Missing file")
 			}
 			return newEntry.result
 			
@@ -546,11 +546,11 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 	
 	func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableView.DropOperation) -> Bool {
 		let pboard = info.draggingPasteboard()
-		guard let files = pboard.propertyList(forType: NSPasteboard.PasteboardType(kUTTypeFileURL as String)) as? NSArray as? [URL] else {
+		guard let files = pboard.propertyList(forType: NSPasteboard.PasteboardType(kUTTypeFileURL as String)) as? [URL] else {
 			return false
 		}
 		
-		processFiles(files.map({$0.path}))
+		processFileURLs(files)
 		
 		return true
 	}
