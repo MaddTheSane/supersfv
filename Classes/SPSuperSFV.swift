@@ -39,7 +39,7 @@ var kRemoveRecordFromList: NSNotification.Name {
 	return NSNotification.Name(rawValue: "RM_RECORD_FROM_LIST")
 }
 
-let fileURLPasteboard = NSPasteboard.PasteboardType(rawValue: kUTTypeFileURL as String)
+private let fileURLPasteboard = NSPasteboard.PasteboardType(rawValue: kUTTypeFileURL as String)
 
 private var applicationVersion: String {
 	let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
@@ -81,16 +81,16 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		return scrollViewLicense.contentView.documentView as! NSTextView
 	}
 	
-	fileprivate let queue: OperationQueue = {
+	private let queue: OperationQueue = {
 		let aqueue = OperationQueue()
 	
 		aqueue.name = "SPDecoder Queue"
 		
 		return aqueue
 	}()
-	fileprivate var records = [FileEntry]()
-	fileprivate var updateProgressTimer: Timer?
-	fileprivate var baseURL = URL(fileURLWithPath: NSHomeDirectory())
+	private var records = [FileEntry]()
+	private var updateProgressTimer: Timer?
+	private var baseURL = URL(fileURLWithPath: NSHomeDirectory())
 	
 	override init() {
 		var dictionary = [String: Any]()
@@ -661,17 +661,17 @@ extension SPSuperSFV: NSToolbarDelegate {
 	
 	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
 		return [addToolbarIdentifier, removeToolbarIdentifier,
-		recalculateToolbarIdentifier, NSToolbarItem.Identifier.separator,
-		checksumToolbarIdentifier, NSToolbarItem.Identifier.flexibleSpace,
+		recalculateToolbarIdentifier, .separator,
+		checksumToolbarIdentifier, .flexibleSpace,
 		saveToolbarIdentifier, stopToolbarIdentifier]
 	}
 	
 	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
 		return [addToolbarIdentifier, recalculateToolbarIdentifier,
 		stopToolbarIdentifier, saveToolbarIdentifier, checksumToolbarIdentifier,
-		NSToolbarItem.Identifier.print, NSToolbarItem.Identifier.customizeToolbar,
-		NSToolbarItem.Identifier.flexibleSpace, NSToolbarItem.Identifier.space,
-		NSToolbarItem.Identifier.separator, removeToolbarIdentifier]
+		.print, .customizeToolbar,
+		.flexibleSpace, .space,
+		.separator, removeToolbarIdentifier]
 	}
 	
 	override func validateToolbarItem(_ theItem: NSToolbarItem) -> Bool {
