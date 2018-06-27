@@ -39,6 +39,8 @@ var kRemoveRecordFromList: NSNotification.Name {
 	return NSNotification.Name(rawValue: "RM_RECORD_FROM_LIST")
 }
 
+let fileURLPasteboard = NSPasteboard.PasteboardType(rawValue: kUTTypeFileURL as String)
+
 private var applicationVersion: String {
 	let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
 	return version ?? "unknown"
@@ -105,7 +107,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		NotificationCenter.default.addObserver(self, selector: #selector(SPSuperSFV.removeSelectedRecords(_:)), name: kRemoveRecordFromList, object: nil)
 		
 		// register for drag and drop on the table view
-		tableViewFileList.registerForDraggedTypes([NSPasteboard.PasteboardType(rawValue: kUTTypeFileURL as String)])
+		tableViewFileList.registerForDraggedTypes([fileURLPasteboard])
 		
 		// make the window pertee and show it
 		buttonStop?.isEnabled = false
@@ -283,7 +285,8 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				guard let r = entry.rangeOfCharacter(from: CharacterSet(charactersIn: " "), options: .backwards) else {
 					continue
 				}
-				let newURL = URL(string: String(entry[entry.startIndex..<r.lowerBound]), relativeTo: fileURL)!
+				let subDir = entry[entry.startIndex..<r.lowerBound]
+				let newURL = thisBaseURL.appendingPathComponent(String(subDir))
 				//let newURL = thisBaseURL.URLByAppendingPathComponent(entry[entry.startIndex..<r.startIndex])
 				let hash = entry[r.upperBound ..< entry.endIndex]
 				
@@ -546,11 +549,13 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 	
 	func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableView.DropOperation) -> Bool {
 		let pboard = info.draggingPasteboard()
-		guard let files = pboard.propertyList(forType: NSPasteboard.PasteboardType(kUTTypeFileURL as String)) as? [URL] else {
-			return false
+		guard let filesAny = pboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType")),
+			let filesNSArr = filesAny as? NSArray,
+			let files = filesNSArr as? [String] else {
+				return false
 		}
 		
-		processFileURLs(files)
+		processFiles(files)
 		
 		return true
 	}
@@ -589,7 +594,7 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 
 // MARK: Toolbar delegate
 extension SPSuperSFV: NSToolbarDelegate {
-	fileprivate func setupToolbar() {
+	private func setupToolbar() {
 		let toolbar = NSToolbar(identifier: superSFVToolbarIdentifier)
 		toolbar.allowsUserCustomization = true
 		toolbar.autosavesConfiguration = true
