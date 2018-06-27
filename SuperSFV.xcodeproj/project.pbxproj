@@ -262,8 +262,7 @@
 				5542CD1A1A3174A70081E21E /* en */,
 			);
 			name = Credits.rtf;
-			path = Resources;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		558AFED01EFEEAAC0009D1B1 /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
