@@ -207,7 +207,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 				}
 				
 				do {
-					try (output).write(to: sPanel.url!, atomically: false, encoding: String.Encoding.utf8)
+					try output.write(to: sPanel.url!, atomically: false, encoding: String.Encoding.utf8)
 				} catch _ {
 					
 				}
@@ -265,7 +265,8 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		NSWorkspace.shared.open(URL(string: "mailto:reikonmusha@gmail.com")!)
 	}
 	
-	@objc(parseSFVFileAtFileURL:) func parseSFVFile(at fileURL: URL) {
+	@objc(parseSFVFileAtFileURL:)
+	func parseSFVFile(at fileURL: URL) {
 		let thisBaseURL = fileURL.deletingLastPathComponent()
 		baseURL = thisBaseURL
 		do {
@@ -323,52 +324,9 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 		
 	}
 	
-	@objc(parseSFVFileAtFilePath:) func parseSFVFile(atPath filePath: String) {
-		var enc = String.Encoding.utf8
-		let contents = (try! String(contentsOfFile: filePath, usedEncoding: &enc)).components(separatedBy: "\n")
-		for entry1 in contents {
-			var errc = 0 //error count
-
-			let entry = entry1.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-			if entry == "" {
-				continue // skip blank lines
-			}
-			if entry.first == ";" {
-				continue // skip the line if it's a comment
-			}
-			guard let r = entry.rangeOfCharacter(from: CharacterSet(charactersIn: " "), options: .backwards) else {
-				continue
-			}
-			let newPath = ((filePath as NSString).deletingLastPathComponent as NSString).appendingPathComponent(String(entry[entry.startIndex..<r.lowerBound]))
-			let hash = entry[r.upperBound ..< entry.endIndex]
-			
-			let newEntry = FileEntry(path: newPath, expectedHash: String(hash))
-			
-			// file doesn't exist...
-			if !FileManager.default.fileExists(atPath: newPath) {
-				newEntry.status = .fileNotFound
-				newEntry.result = NSLocalizedString("Missing", comment: "Missing")
-				errc += 1
-			}
-			
-			// length doesn't match CRC32, MD5 or SHA-1 respectively
-			if hash.count != 8 && hash.count != 32 && hash.count != 40 {
-				newEntry.status = .unknownChecksum;
-				newEntry.expected = NSLocalizedString("Unknown", comment: "Unknown")
-				errc += 1;
-			}
-			
-			// if theres an error, then we don't need to continue with this entry
-			if errc != 0 {
-				records.append(newEntry)
-				updateUI()
-				continue;
-			}
-			// assume it'll fail until proven otherwise
-			newEntry.status = .invalid;
-			
-			queueEntry(newEntry)
-		}
+	@objc(parseSFVFileAtFilePath:)
+	func parseSFVFile(atPath filePath: String) {
+		parseSFVFile(at: URL(fileURLWithPath: filePath))
 	}
 	
 	/// process files dropped on the tableview, icon, or are manually opened
@@ -404,7 +362,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	/// process files dropped on the tableview, icon, or are manually opened
-	fileprivate func processFiles(_ fileNames: [String]) {
+	private func processFiles(_ fileNames: [String]) {
 		
 		processFileURLs(fileNames.map({ (aPath) -> URL in
 			return URL(fileURLWithPath: aPath)
@@ -430,7 +388,7 @@ class SPSuperSFV : NSObject, NSApplicationDelegate {
 	}
 	
 	/// updates the general UI, i.e the toolbar items, and reloads the data for our tableview
-	fileprivate func updateUI() {
+	private func updateUI() {
 		buttonRecalculate?.isEnabled = records.count > 0
 		buttonRemove?.isEnabled = records.count > 0
 		buttonSave?.isEnabled = records.count > 0
@@ -549,6 +507,7 @@ extension SPSuperSFV: NSTableViewDataSource, NSTableViewDelegate {
 	
 	func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableView.DropOperation) -> Bool {
 		let pboard = info.draggingPasteboard()
+		// TODO: update to use something more modern.
 		guard let filesAny = pboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType")),
 			let filesNSArr = filesAny as? NSArray,
 			let files = filesNSArr as? [String] else {
